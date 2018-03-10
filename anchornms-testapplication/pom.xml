@@ -21,9 +21,17 @@
                 <version>1.0-SNAPSHOT</version>
                 <executions>
                     <execution>
+                        <id>ex1</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>sayhi</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ex2</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>faterhi</goal>
                         </goals>
                     </execution>
                 </executions>

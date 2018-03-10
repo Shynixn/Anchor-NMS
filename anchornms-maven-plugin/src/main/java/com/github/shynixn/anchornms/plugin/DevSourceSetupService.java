@@ -89,7 +89,7 @@ public class DevSourceSetupService {
             projectFolder.mkdir();
         }
 
-        final File targetLibraryFile = new File(projectFolder, "mintrecraftserver-1.11.jar");
+        final File targetLibraryFile = new File(projectFolder, "minecraftserver-1.11.jar");
         if (targetLibraryFile.exists()) {
             this.log.info("Finished checking libraries. No new libraries found.");
         }
