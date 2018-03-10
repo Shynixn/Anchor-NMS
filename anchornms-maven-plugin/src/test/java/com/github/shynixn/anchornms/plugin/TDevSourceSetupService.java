@@ -1,6 +1,7 @@
 package com.github.shynixn.anchornms.plugin;
 
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ import java.io.IOException;
 public class TDevSourceSetupService {
 
     @Test
-    public void generateServerSourcesTest() throws IOException, ZipException, InterruptedException {
+    public void generateServerSourcesTest() throws IOException, ZipException, InterruptedException, MojoFailureException {
         // Arrange
         File folder = new File("test");
         if (!folder.exists()) {

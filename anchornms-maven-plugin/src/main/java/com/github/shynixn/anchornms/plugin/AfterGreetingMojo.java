@@ -1,5 +1,6 @@
 package com.github.shynixn.anchornms.plugin;
 
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -65,6 +66,8 @@ public class AfterGreetingMojo extends AbstractMojo {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ZipException e) {
             e.printStackTrace();
         }
 

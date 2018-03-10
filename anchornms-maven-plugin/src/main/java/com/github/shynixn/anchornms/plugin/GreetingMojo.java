@@ -38,7 +38,7 @@ import java.io.IOException;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@Mojo(name = "sayhi",defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "sayhi")
 public class GreetingMojo extends AbstractMojo {
 
     @Parameter(readonly = true, defaultValue = "${project}")
