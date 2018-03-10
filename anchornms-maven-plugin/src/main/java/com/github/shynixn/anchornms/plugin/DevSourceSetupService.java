@@ -3,6 +3,7 @@ package com.github.shynixn.anchornms.plugin;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
@@ -39,6 +40,7 @@ import java.net.URL;
 public class DevSourceSetupService {
 
     private static final String DEV_FOLDER = "dev-tools1";
+    private static final String TO_BE_OBFUSCATED_JAR = "to-be-obfuscated.jar";
     private static final String GRADLE_LOCAL = "gradle.jar";
     private static final String GRADLE_VERSION = "gradle-4.6";
     private static final String GRADLE_DOWNLOAD = "https://services.gradle.org/distributions/gradle-4.6-bin.zip";
@@ -56,6 +58,30 @@ public class DevSourceSetupService {
         return this.devTools.exists();
     }
 
+    public void obfuscateJarFile(File jarFile) throws IOException, InterruptedException, MojoFailureException {
+        if (!this.devTools.exists()) {
+            this.devTools.mkdir();
+        }
+
+        File tobeObfuscated = new File(devTools, TO_BE_OBFUSCATED_JAR);
+
+        FileUtils.copyFile(jarFile, tobeObfuscated);
+
+        log.info("Managing contents...");
+        this.executeGradleCommand(this.devTools, "build");
+        log.info("Finished managing contents.");
+
+        File obFuscatedJar = new File(devTools, "build/libs/" + devTools.getName() + ".jar");
+
+        if (!obFuscatedJar.exists()) {
+            throw new MojoFailureException("Obfuscated jar was not generated!");
+        }
+
+        log.info("Replacing original jar file...");
+        FileUtils.copyFile(obFuscatedJar, jarFile);
+        log.info("File " + jarFile.getName() + "was replaced.");
+    }
+
     public void generateMinecraftServerLibraries() throws IOException, ZipException, InterruptedException {
         this.log.info("Checking libraries...");
         final File projectFolder = new File(this.devTools.getParentFile().getParentFile(), "lib");
@@ -63,7 +89,7 @@ public class DevSourceSetupService {
             projectFolder.mkdir();
         }
 
-        final File targetLibraryFile = new File(projectFolder, "minecraftserver-1.11.jar");
+        final File targetLibraryFile = new File(projectFolder, "mintrecraftserver-1.11.jar");
         if (targetLibraryFile.exists()) {
             this.log.info("Finished checking libraries. No new libraries found.");
         }

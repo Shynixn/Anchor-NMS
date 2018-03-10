@@ -33,6 +33,7 @@ public class HelloWorld {
         System.out.println("HELLO WORLD");
 
         EntityArmorStand entityArmorStand = new EntityArmorStand(null);
+        entityArmorStand.canBeAttackedWithItem();
 
         System.out.println("HELLO ARMORSTAND");
 

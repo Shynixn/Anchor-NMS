@@ -1,6 +1,7 @@
 package com.github.shynixn.anchornms.plugin;
 
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -45,7 +46,87 @@ public class TDevSourceSetupService {
 
         //Act
 
-        DevSourceSetupService classUnderTest = new DevSourceSetupService(folder);
+        DevSourceSetupService classUnderTest = new DevSourceSetupService(folder, new Log() {
+            @Override
+            public boolean isDebugEnabled() {
+                return false;
+            }
+
+            @Override
+            public void debug(CharSequence charSequence) {
+
+            }
+
+            @Override
+            public void debug(CharSequence charSequence, Throwable throwable) {
+
+            }
+
+            @Override
+            public void debug(Throwable throwable) {
+
+            }
+
+            @Override
+            public boolean isInfoEnabled() {
+                return false;
+            }
+
+            @Override
+            public void info(CharSequence charSequence) {
+
+            }
+
+            @Override
+            public void info(CharSequence charSequence, Throwable throwable) {
+
+            }
+
+            @Override
+            public void info(Throwable throwable) {
+
+            }
+
+            @Override
+            public boolean isWarnEnabled() {
+                return false;
+            }
+
+            @Override
+            public void warn(CharSequence charSequence) {
+
+            }
+
+            @Override
+            public void warn(CharSequence charSequence, Throwable throwable) {
+
+            }
+
+            @Override
+            public void warn(Throwable throwable) {
+
+            }
+
+            @Override
+            public boolean isErrorEnabled() {
+                return false;
+            }
+
+            @Override
+            public void error(CharSequence charSequence) {
+
+            }
+
+            @Override
+            public void error(CharSequence charSequence, Throwable throwable) {
+
+            }
+
+            @Override
+            public void error(Throwable throwable) {
+
+            }
+        });
         classUnderTest.generateMinecraftServerLibraries();
 
         //Assert

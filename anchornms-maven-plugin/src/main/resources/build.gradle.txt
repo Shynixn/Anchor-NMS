@@ -8,6 +8,7 @@ buildscript {
             name = "sponge"
             url "https://repo.spongepowered.org/maven"
         }
+        jcenter()
     }
 
     dependencies {
@@ -21,7 +22,14 @@ plugins {
     id 'net.minecrell.vanillagradle.server' version '2.2-3'
 }
 
+jar {
+    from zipTree("to-be-obfuscated.jar")
+}
+
 minecraft {
     version = '1.11'
     mappings = 'snapshot_20170120'
 }
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
