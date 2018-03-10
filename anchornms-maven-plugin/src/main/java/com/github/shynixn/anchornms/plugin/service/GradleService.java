@@ -99,7 +99,7 @@ public class GradleService implements AutoCloseable {
             this.log.info("Finished downloading gradle.");
         }
 
-        final File buildGradleTargetFile = new File(this.buildFolder, "build.gradle");
+        final File buildGradleTargetFile = new File(this.buildFolder, GRADLE_VERSION);
         if (!buildGradleTargetFile.exists()) {
             this.log.info("Installing gradle...");
             final ZipFile zipFile = new ZipFile(gradleDownloadFile);
