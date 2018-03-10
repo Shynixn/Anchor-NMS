@@ -1,15 +1,15 @@
-package com.github.shynixn.anchornms.plugin;
+package com.github.shynixn.anchornms.plugin.mojo;
 
+import com.github.shynixn.anchornms.plugin.Version;
+import com.github.shynixn.anchornms.plugin.service.ActionSetupService;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by Shynixn 2018.
@@ -38,26 +38,40 @@ import java.io.IOException;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@Mojo(name = "sayhi")
-public class GreetingMojo extends AbstractMojo {
+@Mojo(name = "generate-sponge-libraries")
+public class LibrariesInstallerMojo extends AbstractMojo {
 
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
-    private DevSourceSetupService devSourceSetupService;
+    @Parameter
+    private String[] spongeVersions;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        devSourceSetupService = new DevSourceSetupService(new File(project.getBuild().getDirectory()), getLog());
+        if (this.spongeVersions == null) {
+            throw new MojoFailureException("Please specific the <spongeVersions> tag in the " +
+                    "<configuration> section.");
+        }
+
+        if (this.spongeVersions.length == 0) {
+            throw new MojoFailureException("No versions where specified in the  <spongeVersions> tag.");
+        }
+
+        final ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog());
 
         try {
-            devSourceSetupService.generateMinecraftServerLibraries();
-        } catch (Exception e) {
-            throw new MojoFailureException(e.getMessage(),e);
+            for (final String versionText : this.spongeVersions) {
+                final Version version = Version.getVersionFromText(versionText);
+                if (version == null) {
+                    throw new MojoFailureException("Version '" + versionText + "' could not be resolved!");
+                }
+
+                devSourceSetupService.generateSpongeLibrary(version);
+            }
+            devSourceSetupService.close();
+        } catch (final Exception e) {
+            throw new MojoFailureException(e.getMessage(), e);
         }
     }
-
-
-
-
-
 }

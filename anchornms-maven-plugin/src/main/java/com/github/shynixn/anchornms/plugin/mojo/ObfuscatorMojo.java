@@ -1,7 +1,8 @@
-package com.github.shynixn.anchornms.plugin;
+package com.github.shynixn.anchornms.plugin.mojo;
 
+import com.github.shynixn.anchornms.plugin.Version;
+import com.github.shynixn.anchornms.plugin.service.ActionSetupService;
 import net.lingala.zip4j.exception.ZipException;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -40,37 +41,42 @@ import java.io.IOException;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@Mojo(name = "faterhi", defaultPhase = LifecyclePhase.PACKAGE)
-public class AfterGreetingMojo extends AbstractMojo {
+@Mojo(name = "obfuscate-jar", defaultPhase = LifecyclePhase.PACKAGE)
+public class ObfuscatorMojo extends AbstractMojo {
 
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
-    private DevSourceSetupService devSourceSetupService;
+    private ActionSetupService devSourceSetupService;
+
+    private String[] spongeVersions;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        File file = project.getArtifact().getFile();
+        final File file = this.project.getArtifact().getFile();
 
         if (file == null || !file.exists()) {
             throw new MojoFailureException("Artifact jar does not exist!");
         }
 
-        devSourceSetupService = new DevSourceSetupService(new File(project.getBuild().getDirectory()), getLog());
+        this.devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog());
 
-        getLog().info("Obfuscating jar " + file.getName() + " ...");
+        this.getLog().info("Obfuscating jar " + file.getName() + " ...");
+
+        final ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog());
 
         try {
-            devSourceSetupService.obfuscateJarFile(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ZipException e) {
-            e.printStackTrace();
-        }
+            for (final String versionText : this.spongeVersions) {
+                final Version version = Version.getVersionFromText(versionText);
+                if (version == null) {
+                    throw new MojoFailureException("Version '" + versionText + "' could not be resolved!");
+                }
 
-        getLog().info("Finished obfuscating jar " + file.getName() + ".");
+                devSourceSetupService.obfuscateJarFile(version, file);
+            }
+            devSourceSetupService.close();
+        } catch (final Exception e) {
+            throw new MojoFailureException(e.getMessage(), e);
+        }
     }
 }

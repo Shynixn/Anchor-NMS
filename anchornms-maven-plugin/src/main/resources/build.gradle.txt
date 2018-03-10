@@ -27,8 +27,8 @@ jar {
 }
 
 minecraft {
-    version = '1.11'
-    mappings = 'snapshot_20170120'
+    version = '<VERSION>'
+    mappings = '<SNAPSHOTMAPPING>'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
