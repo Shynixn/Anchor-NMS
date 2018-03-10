@@ -28,9 +28,10 @@ package com.github.shynixn.anchornms.plugin;
  * SOFTWARE.
  */
 public enum Version {
-    SPONGE_NMS_v1_11("1.11", "snapshot_20170120", "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\1.11\\snapshot\\20170120\\minecraft_serverSrc-1.11.jar");
+    SPONGE_NMS_v1_11("1.11", "snapshot_20170120", "v1_11_mcpR1", "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\1.11\\snapshot\\20170120\\minecraft_serverSrc-1.11.jar");
 
     private final String version;
+    private final String packageVersion;
     private final String snapshotVersion;
     private final String gradleInstallPath;
 
@@ -39,10 +40,12 @@ public enum Version {
      *
      * @param version           version
      * @param snapshotVersion   snapshotVersion
+     * @param packageVersion    packetVersion
      * @param gradleInstallPath gradleInstallPath
      */
-    Version(String version, String snapshotVersion, String gradleInstallPath) {
+    Version(String version, String snapshotVersion, String packageVersion, String gradleInstallPath) {
         this.version = version;
+        this.packageVersion = packageVersion;
         this.snapshotVersion = snapshotVersion;
         this.gradleInstallPath = gradleInstallPath;
     }
@@ -72,6 +75,15 @@ public enum Version {
      */
     public String getGradleInstallPath() {
         return this.gradleInstallPath;
+    }
+
+    /**
+     * Returns the package version.
+     *
+     * @return version
+     */
+    public String getPackageVersion() {
+        return this.packageVersion;
     }
 
     /**

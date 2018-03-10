@@ -57,18 +57,24 @@ public class GradleService implements AutoCloseable {
      * @param version version
      * @throws IOException exception
      */
-    public void generateBuildGradleFor(Version version) throws IOException {
+    public void generateBuildGradleFor(Version version, boolean prefix) throws IOException {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null!");
         }
 
+        String resource = "build.gradle.txt";
+        if (prefix) {
+            resource = "relocate-build.gradle.txt";
+        }
+
         final File buildGradleTargetFile = new File(this.buildFolder, "build.gradle");
-        final URL buildGradleFile = Thread.currentThread().getContextClassLoader().getResource("build.gradle.txt");
+        final URL buildGradleFile = Thread.currentThread().getContextClassLoader().getResource(resource);
         FileUtils.copyURLToFile(buildGradleFile, buildGradleTargetFile);
 
         String content = FileUtils.readFileToString(buildGradleTargetFile, "UTF-8");
         content = content.replace("<SNAPSHOTMAPPING>", version.getSnapshotVersion())
-                .replace("<VERSION>", version.getVersion());
+                .replace("<VERSION>", version.getVersion())
+                .replace("<PACKAGEVERSION>", version.getPackageVersion());
 
         FileUtils.write(buildGradleTargetFile, content, "UTF-8");
         log.info("Updated build.gradle.");

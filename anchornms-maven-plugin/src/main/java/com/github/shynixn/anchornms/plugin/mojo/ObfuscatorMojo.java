@@ -49,10 +49,20 @@ public class ObfuscatorMojo extends AbstractMojo {
 
     private ActionSetupService devSourceSetupService;
 
-    private String[] spongeVersions;
+    @Parameter
+    private String[] obfuscatorVersions;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (this.obfuscatorVersions == null) {
+            throw new MojoFailureException("Please specific the <obfuscatorVersions> tag in the " +
+                    "<configuration> section.");
+        }
+
+        if (this.obfuscatorVersions.length == 0) {
+            throw new MojoFailureException("No versions where specified in the <obfuscatorVersions> tag.");
+        }
+
         final File file = this.project.getArtifact().getFile();
 
         if (file == null || !file.exists()) {
@@ -66,7 +76,7 @@ public class ObfuscatorMojo extends AbstractMojo {
         final ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog());
 
         try {
-            for (final String versionText : this.spongeVersions) {
+            for (final String versionText : this.obfuscatorVersions) {
                 final Version version = Version.getVersionFromText(versionText);
                 if (version == null) {
                     throw new MojoFailureException("Version '" + versionText + "' could not be resolved!");

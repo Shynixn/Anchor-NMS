@@ -2,13 +2,16 @@ package com.github.shynixn.anchornms.plugin.service;
 
 import com.github.shynixn.anchornms.plugin.Version;
 import com.github.shynixn.anchornms.plugin.service.GradleService;
+import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by Shynixn 2018.
@@ -76,12 +79,9 @@ public class ActionSetupService implements AutoCloseable {
      */
     public void generateSpongeLibrary(Version version) throws IOException, ZipException, InterruptedException, MojoFailureException {
         this.log.info("Checking library " + version.getVersion() + " ...");
-        final File projectFolder = new File(this.devTools.getParentFile().getParentFile(), "lib");
-        if (!projectFolder.exists()) {
-            projectFolder.mkdir();
-        }
 
-        final File targetLibraryFile = new File(projectFolder, "minecraftserver-" + version.getVersion() + ".jar");
+        final File targetLibraryFile = new File(this.devTools, "mcp-" + version.getVersion() + ".jar");
+        final File temporaryLibraryFile = new File(this.devTools, "tmp-minecraftserver.jar");
         if (targetLibraryFile.exists()) {
             this.log.info("Finished checking library " + version.getVersion() + ". It does already exist.");
             return;
@@ -89,13 +89,19 @@ public class ActionSetupService implements AutoCloseable {
 
         this.log.info("Generating library " + version.getVersion() + " via ForgeGradle...");
 
-        this.gradleService.generateBuildGradleFor(version);
+        this.gradleService.generateBuildGradleFor(version, true);
         this.gradleService.executeCommand("setupDecompWorkspace");
 
         final File minecraftServerFile = new File(this.userHomer, version.getGradleInstallPath());
-        FileUtils.copyFile(minecraftServerFile, targetLibraryFile);
+        FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);
 
-        this.log.info("Copied " + targetLibraryFile.getName() + " to lib folder.");
+        this.gradleService.executeCommand("shadowJar");
+
+        FileUtils.moveFile(new File(this.devTools, "\\build\\libs\\nms-tools-all.jar"), targetLibraryFile);
+
+        FileUtils.deleteQuietly(temporaryLibraryFile);
+
+        this.log.info("Generated " + targetLibraryFile.getName() + " in folder.");
         this.log.info("Finished checking library " + version.getVersion() + ". New library was created.");
     }
 
@@ -116,7 +122,7 @@ public class ActionSetupService implements AutoCloseable {
         FileUtils.copyFile(jarFile, tobeObfuscated);
 
         this.log.info("Obfuscating via ForgeGradle...");
-        this.gradleService.generateBuildGradleFor(version);
+        this.gradleService.generateBuildGradleFor(version, false);
         this.gradleService.executeCommand("build");
         this.log.info("Finished ForgeGradle process.");
 
