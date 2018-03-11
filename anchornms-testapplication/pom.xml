@@ -23,13 +23,21 @@
                     <execution>
                         <goals>
                             <goal>obfuscate-jar</goal>
+                            <goal>refactor-nms</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
                     <spongeVersions>
                         <spongeVersion>1.11</spongeVersion>
+                        <spongeVersion>1.12</spongeVersion>
                     </spongeVersions>
+                    <obfuscatorVersions>
+                        <property>
+                            <name>1.11</name>
+                            <value>com.v1_11</value>
+                        </property>
+                    </obfuscatorVersions>
                 </configuration>
             </plugin>
         </plugins>
@@ -38,10 +46,10 @@
     <dependencies>
         <dependency>
             <groupId>net</groupId>
-            <artifactId>minecraftserver-18R1</artifactId>
+            <artifactId>mcp-11R1</artifactId>
             <scope>system</scope>
             <version>1.0</version>
-            <systemPath>${basedir}/lib/minecraftserver-1.11.jar</systemPath>
+            <systemPath>${basedir}/lib/mcp-1.11.jar</systemPath>
         </dependency>
     </dependencies>
 

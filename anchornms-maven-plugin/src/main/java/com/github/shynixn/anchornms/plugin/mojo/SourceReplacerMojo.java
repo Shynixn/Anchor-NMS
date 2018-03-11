@@ -1,4 +1,15 @@
-import net.minecraft.entity.item.EntityArmorStand;
+package com.github.shynixn.anchornms.plugin.mojo;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+
+import java.io.File;
+import java.util.List;
 
 /**
  * Created by Shynixn 2018.
@@ -27,15 +38,34 @@ import net.minecraft.entity.item.EntityArmorStand;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class HelloWorld {
+@Mojo(name = "refactor-nms", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
+public class SourceReplacerMojo extends AbstractMojo {
 
-    public static void main(String[] args) {
-        System.out.println("HELLO WORLD");
+    @Parameter(readonly = true, defaultValue = "${project}")
+    private MavenProject project;
 
-        EntityArmorStand entityArmorStand = new EntityArmorStand(null);
-        entityArmorStand.canBeAttackedWithItem();
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        List<String>  sources = project.getCompileSourceRoots();
 
-        System.out.println("HELLO ARMORSTAND");
+        System.out.println("GENERATED SOURCE");
+        for(String source : sources)
+        {
+            System.out.println(source);
+        }
+    }
+
+
+    private void replaceSources()
+    {
 
     }
+
+
+
+
+
+
+
+
 }

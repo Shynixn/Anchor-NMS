@@ -2,7 +2,6 @@ package com.github.shynixn.anchornms.plugin.mojo;
 
 import com.github.shynixn.anchornms.plugin.Version;
 import com.github.shynixn.anchornms.plugin.service.ActionSetupService;
-import net.lingala.zip4j.exception.ZipException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -12,7 +11,10 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.zip.ZipFile;
 
 /**
  * Created by Shynixn 2018.
@@ -50,7 +52,7 @@ public class ObfuscatorMojo extends AbstractMojo {
     private ActionSetupService devSourceSetupService;
 
     @Parameter
-    private String[] obfuscatorVersions;
+    private Properties obfuscatorVersions;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -59,7 +61,7 @@ public class ObfuscatorMojo extends AbstractMojo {
                     "<configuration> section.");
         }
 
-        if (this.obfuscatorVersions.length == 0) {
+        if (this.obfuscatorVersions.size() == 0) {
             throw new MojoFailureException("No versions where specified in the <obfuscatorVersions> tag.");
         }
 
@@ -73,18 +75,26 @@ public class ObfuscatorMojo extends AbstractMojo {
 
         this.getLog().info("Obfuscating jar " + file.getName() + " ...");
 
-        final ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog());
-
-        try {
-            for (final String versionText : this.obfuscatorVersions) {
-                final Version version = Version.getVersionFromText(versionText);
+        try (ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog())) {
+            final List<File> files = new ArrayList<>();
+            for (final Object key : this.obfuscatorVersions.keySet()) {
+                final Version version = Version.getVersionFromText(String.valueOf(key));
                 if (version == null) {
-                    throw new MojoFailureException("Version '" + versionText + "' could not be resolved!");
+                    throw new MojoFailureException("Version '" + version.getVersion() + "' could not be resolved!");
                 }
 
-                devSourceSetupService.obfuscateJarFile(version, file);
+                final String value = (String) obfuscatorVersions.get(key);
+                if (value.equals("*")) {
+                    devSourceSetupService.obfuscateJarFile(version, file);
+                    return;
+                } else {
+                    files.add(devSourceSetupService.obfuscateClassPath(value, version));
+                }
             }
-            devSourceSetupService.close();
+
+         //   files.add(file);
+         //   devSourceSetupService.getGradleService().mergeJarFiles(file, files);
+
         } catch (final Exception e) {
             throw new MojoFailureException(e.getMessage(), e);
         }

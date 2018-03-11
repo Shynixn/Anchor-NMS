@@ -8,10 +8,12 @@ import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by Shynixn 2018.
@@ -103,6 +105,40 @@ public class ActionSetupService implements AutoCloseable {
 
         this.log.info("Generated " + targetLibraryFile.getName() + " in folder.");
         this.log.info("Finished checking library " + version.getVersion() + ". New library was created.");
+    }
+
+    public File obfuscateClassPath(String classPath, Version version) throws ZipException, MojoFailureException, IOException, InterruptedException {
+        this.log.info("Obfuscating " + classPath + " for " + version.getVersion() + "...");
+
+        if (classPath.endsWith(".class")) {
+            throw new MojoFailureException("ClassPath cannot end with .class!");
+        }
+
+        final File folder = new File(this.devTools.getParent(), "classes/" + classPath.replace(".", "/"));
+
+        System.out.println(folder.getAbsolutePath());
+
+        this.log.info("Obfuscating " + folder.getAbsolutePath() + "...");
+        final File file = new File(this.devTools, UUID.randomUUID().toString() + ".jar");
+        if (file.exists()) {
+            file.delete();
+        }
+
+        final ZipFile zipFile = new ZipFile(file);
+        zipFile.addFolder(folder, new ZipParameters());
+
+        this.obfuscateJarFile(version, file);
+
+        this.log.info("Finished obfuscating jar " + classPath + " for " + version.getVersion() + ".");
+        return file;
+    }
+
+    /**
+     * Returns the gradle service.
+     * @return service
+     */
+    public GradleService getGradleService() {
+        return this.gradleService;
     }
 
     /**
