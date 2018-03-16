@@ -1,6 +1,7 @@
 package com.github.shynixn.anchornms.plugin.service;
 
 import com.github.shynixn.anchornms.plugin.Version;
+import com.github.shynixn.anchornms.plugin.relocator.JarRelocator;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoFailureException;
@@ -8,6 +9,8 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Shynixn 2018.
@@ -133,27 +136,12 @@ public class ActionSetupService implements AutoCloseable {
 
         for (final Version version : versions) {
 
-            this.log.info("Relocating " + version.getVersion() + " via lucko jar-relocator...");
-
-            final File relocatorTemp = new File(tobeObfuscated.getParentFile(), "relocator-temp.jar");
-            if (relocatorTemp.exists()) {
-                FileUtils.deleteQuietly(relocatorTemp);
-            }
-
-
-
-
-        /*  final List<Relocation> rules = new ArrayList<>();
-            rules.add(new Relocation("net.minecraft.server." + version.getPackageVersion(), "net.minecraft.server"));
-            JarRelocator relocator = new JarRelocator(tobeObfuscated, relocatorTemp, rules);
-
-            try {
-                relocator.run();
-            } catch (final IOException e) {
-                throw new MojoFailureException("Failed to relocate paths.");
-            }
-
-            FileUtils.copyFile(relocatorTemp, tobeObfuscated);*/
+            this.log.info("Relocating " + version.getVersion() + " ...");
+            final Map<String, String> pattern = new HashMap<>();
+            pattern.put("net.minecraft.server." + version.getPackageVersion(), "net.minecraft");
+            final JarRelocator jarRelocator = JarRelocator.from(tobeObfuscated, log);
+            jarRelocator.relocate(pattern);
+            this.log.info("Successfully relocated " + version.getVersion() + ".");
 
             this.log.info("Obfuscating " + version.getVersion() + "via ForgeGradle...");
             this.gradleService.generateBuildGradleFor(version, false);
@@ -166,11 +154,11 @@ public class ActionSetupService implements AutoCloseable {
             }
 
             FileUtils.copyFile(finalObfuscatedJar, tobeObfuscated);
-            FileUtils.deleteQuietly(finalObfuscatedJar);
+         //   FileUtils.deleteQuietly(finalObfuscatedJar);
         }
 
         this.log.info("Replacing original jar file...");
-        FileUtils.copyFile(finalObfuscatedJar, jarFile);
+        FileUtils.copyFile(tobeObfuscated, jarFile);
 
         this.log.info("File " + jarFile.getName() + " was replaced.");
         this.log.info("Finished obfuscating jar " + jarFile.getName() + ".");

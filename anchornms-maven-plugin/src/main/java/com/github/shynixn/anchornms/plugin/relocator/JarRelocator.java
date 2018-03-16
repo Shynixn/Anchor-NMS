@@ -104,12 +104,17 @@ public class JarRelocator {
                 }
             }
 
-            if (this.temp) {
-                this.replaceTempFile();
-            }
         } catch (final IOException e) {
             this.log.error(e);
             throw new MojoFailureException(e.getMessage(), e);
+        }
+
+        if (this.temp) {
+            try {
+                this.replaceTempFile();
+            } catch (final IOException e) {
+                throw new MojoFailureException(e.getMessage(), e);
+            }
         }
     }
 

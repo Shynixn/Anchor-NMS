@@ -48,8 +48,6 @@ public class ObfuscatorMojo extends AbstractMojo {
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
-    private ActionSetupService devSourceSetupService;
-
     @Parameter
     private String[] spongeVersions;
 
@@ -65,11 +63,9 @@ public class ObfuscatorMojo extends AbstractMojo {
         }
 
         final File file = this.project.getArtifact().getFile();
-
         if (file == null || !file.exists()) {
             throw new MojoFailureException("Artifact jar does not exist!");
         }
-
 
         try (ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog())) {
             final List<Version> versions = new ArrayList<>();
