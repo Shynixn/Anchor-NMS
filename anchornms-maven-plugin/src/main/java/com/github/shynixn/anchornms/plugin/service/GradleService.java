@@ -82,44 +82,6 @@ public class GradleService implements AutoCloseable {
     }
 
     /**
-     * Merges the given files into the targetJar file.
-     *
-     * @param targetJarFile targetJarFile
-     * @param files         files
-     * @throws IOException          exception
-     * @throws InterruptedException exception
-     * @throws ZipException         exception
-     * @throws MojoFailureException exception
-     */
-    public void mergeJarFiles(File targetJarFile, List<File> files) throws IOException, InterruptedException, ZipException, MojoFailureException {
-        final String resource = "merge-build.gradle.txt";
-        final File buildGradleTargetFile = new File(this.buildFolder, "build.gradle");
-        final URL buildGradleFile = Thread.currentThread().getContextClassLoader().getResource(resource);
-        FileUtils.copyURLToFile(buildGradleFile, buildGradleTargetFile);
-
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (final File file : files) {
-            if (stringBuilder.length() == 0) {
-                stringBuilder.append("zipTree(\"").append(file.getAbsolutePath().replace("\\", "/")).append("\")");
-            } else {
-                stringBuilder.append(", zipTree(\"").append(file.getAbsolutePath().replace("\\", "/")).append("\")");
-            }
-        }
-
-        String content = FileUtils.readFileToString(buildGradleTargetFile, "UTF-8");
-        content = content.replace("<JARSOURCES>", stringBuilder.toString());
-        FileUtils.write(buildGradleTargetFile, content, "UTF-8");
-
-        this.executeCommand("jar");
-
-        if (targetJarFile.exists()) {
-            targetJarFile.delete();
-        }
-
-        FileUtils.moveFile(new File(this.buildFolder, "\\build\\libs\\nms-tools.jar"), targetJarFile);
-    }
-
-    /**
      * Executes a new gradle command.
      *
      * @param command command
