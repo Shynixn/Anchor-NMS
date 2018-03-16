@@ -41,7 +41,7 @@ import java.io.File;
 @Mojo(name = "generate-sponge-libraries")
 public class LibrariesInstallerMojo extends AbstractMojo {
 
-    @Parameter(readonly = true, defaultValue = "22:00")
+    @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
     @Parameter

@@ -1,19 +1,13 @@
 package com.github.shynixn.anchornms.plugin.service;
 
 import com.github.shynixn.anchornms.plugin.Version;
-import com.github.shynixn.anchornms.plugin.service.GradleService;
-import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Created by Shynixn 2018.
@@ -107,34 +101,9 @@ public class ActionSetupService implements AutoCloseable {
         this.log.info("Finished checking library " + version.getVersion() + ". New library was created.");
     }
 
-    public File obfuscateClassPath(String classPath, Version version) throws ZipException, MojoFailureException, IOException, InterruptedException {
-        this.log.info("Obfuscating " + classPath + " for " + version.getVersion() + "...");
-
-        if (classPath.endsWith(".class")) {
-            throw new MojoFailureException("ClassPath cannot end with .class!");
-        }
-
-        final File folder = new File(this.devTools.getParent(), "classes/" + classPath.replace(".", "/"));
-
-        System.out.println(folder.getAbsolutePath());
-
-        this.log.info("Obfuscating " + folder.getAbsolutePath() + "...");
-        final File file = new File(this.devTools, UUID.randomUUID().toString() + ".jar");
-        if (file.exists()) {
-            file.delete();
-        }
-
-        final ZipFile zipFile = new ZipFile(file);
-        zipFile.addFolder(folder, new ZipParameters());
-
-        this.obfuscateJarFile(version, file);
-
-        this.log.info("Finished obfuscating jar " + classPath + " for " + version.getVersion() + ".");
-        return file;
-    }
-
     /**
      * Returns the gradle service.
+     *
      * @return service
      */
     public GradleService getGradleService() {
@@ -144,31 +113,65 @@ public class ActionSetupService implements AutoCloseable {
     /**
      * Obfuscates the given jarFile for the given minecraft version-
      *
-     * @param version version
-     * @param jarFile jarFile
+     * @param versions version
+     * @param jarFile  jarFile
      * @throws IOException          exception
      * @throws InterruptedException exception
      * @throws MojoFailureException exception
      * @throws ZipException         exception
      */
-    public void obfuscateJarFile(Version version, File jarFile) throws IOException, InterruptedException, MojoFailureException, ZipException {
+    public void obfuscateJarFile(File jarFile, Version... versions) throws IOException, InterruptedException, MojoFailureException, ZipException {
+        if (versions.length == 0) {
+            throw new MojoFailureException("One version has to be atleast defined!");
+        }
+
         this.log.info("Obfuscating jar " + jarFile.getName() + " ...");
 
         final File tobeObfuscated = new File(this.devTools, TO_BE_OBFUSCATED_JAR);
+        File finalObfuscatedJar = null;
         FileUtils.copyFile(jarFile, tobeObfuscated);
 
-        this.log.info("Obfuscating via ForgeGradle...");
-        this.gradleService.generateBuildGradleFor(version, false);
-        this.gradleService.executeCommand("build");
-        this.log.info("Finished ForgeGradle process.");
+        for (final Version version : versions) {
 
-        final File finalObfuscatedJar = new File(this.devTools, "build/libs/" + this.devTools.getName() + ".jar");
-        if (!finalObfuscatedJar.exists()) {
-            throw new MojoFailureException("Obfuscated jar was not generated!");
+            this.log.info("Relocating " + version.getVersion() + " via lucko jar-relocator...");
+
+            final File relocatorTemp = new File(tobeObfuscated.getParentFile(), "relocator-temp.jar");
+            if (relocatorTemp.exists()) {
+                FileUtils.deleteQuietly(relocatorTemp);
+            }
+
+
+
+
+        /*  final List<Relocation> rules = new ArrayList<>();
+            rules.add(new Relocation("net.minecraft.server." + version.getPackageVersion(), "net.minecraft.server"));
+            JarRelocator relocator = new JarRelocator(tobeObfuscated, relocatorTemp, rules);
+
+            try {
+                relocator.run();
+            } catch (final IOException e) {
+                throw new MojoFailureException("Failed to relocate paths.");
+            }
+
+            FileUtils.copyFile(relocatorTemp, tobeObfuscated);*/
+
+            this.log.info("Obfuscating " + version.getVersion() + "via ForgeGradle...");
+            this.gradleService.generateBuildGradleFor(version, false);
+            this.gradleService.executeCommand("build");
+            this.log.info("Finished ForgeGradle process.");
+
+            finalObfuscatedJar = new File(this.devTools, "build/libs/" + this.devTools.getName() + ".jar");
+            if (!finalObfuscatedJar.exists()) {
+                throw new MojoFailureException("Obfuscated jar was not generated!");
+            }
+
+            FileUtils.copyFile(finalObfuscatedJar, tobeObfuscated);
+            FileUtils.deleteQuietly(finalObfuscatedJar);
         }
 
         this.log.info("Replacing original jar file...");
         FileUtils.copyFile(finalObfuscatedJar, jarFile);
+
         this.log.info("File " + jarFile.getName() + " was replaced.");
         this.log.info("Finished obfuscating jar " + jarFile.getName() + ".");
     }

@@ -8,13 +8,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.zip.ZipFile;
 
 /**
  * Created by Shynixn 2018.
@@ -43,7 +42,7 @@ import java.util.zip.ZipFile;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@Mojo(name = "obfuscate-jar", defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "obfuscate-jar", defaultPhase = LifecyclePhase.PACKAGE,  requiresDependencyResolution = ResolutionScope.RUNTIME )
 public class ObfuscatorMojo extends AbstractMojo {
 
     @Parameter(readonly = true, defaultValue = "${project}")
@@ -52,17 +51,17 @@ public class ObfuscatorMojo extends AbstractMojo {
     private ActionSetupService devSourceSetupService;
 
     @Parameter
-    private Properties obfuscatorVersions;
+    private String[] spongeVersions;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.obfuscatorVersions == null) {
-            throw new MojoFailureException("Please specific the <obfuscatorVersions> tag in the " +
+        if (this.spongeVersions == null) {
+            throw new MojoFailureException("Please specific the <spongeVersions> tag in the " +
                     "<configuration> section.");
         }
 
-        if (this.obfuscatorVersions.size() == 0) {
-            throw new MojoFailureException("No versions where specified in the <obfuscatorVersions> tag.");
+        if (this.spongeVersions.length == 0) {
+            throw new MojoFailureException("No versions where specified in the  <spongeVersions> tag.");
         }
 
         final File file = this.project.getArtifact().getFile();
@@ -71,30 +70,17 @@ public class ObfuscatorMojo extends AbstractMojo {
             throw new MojoFailureException("Artifact jar does not exist!");
         }
 
-        this.devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog());
-
-        this.getLog().info("Obfuscating jar " + file.getName() + " ...");
 
         try (ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog())) {
-            final List<File> files = new ArrayList<>();
-            for (final Object key : this.obfuscatorVersions.keySet()) {
-                final Version version = Version.getVersionFromText(String.valueOf(key));
+            final List<Version> versions = new ArrayList<>();
+            for (final String versionTag : this.spongeVersions) {
+                final Version version = Version.getVersionFromText(versionTag);
                 if (version == null) {
                     throw new MojoFailureException("Version '" + version.getVersion() + "' could not be resolved!");
                 }
-
-                final String value = (String) obfuscatorVersions.get(key);
-                if (value.equals("*")) {
-                    devSourceSetupService.obfuscateJarFile(version, file);
-                    return;
-                } else {
-                    files.add(devSourceSetupService.obfuscateClassPath(value, version));
-                }
+                versions.add(version);
             }
-
-         //   files.add(file);
-         //   devSourceSetupService.getGradleService().mergeJarFiles(file, files);
-
+            devSourceSetupService.obfuscateJarFile(file, versions.toArray(new Version[versions.size()]));
         } catch (final Exception e) {
             throw new MojoFailureException(e.getMessage(), e);
         }
