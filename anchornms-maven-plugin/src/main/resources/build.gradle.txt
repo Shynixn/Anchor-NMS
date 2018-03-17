@@ -4,21 +4,14 @@ buildscript {
             name = 'forge'
             url = 'https://files.minecraftforge.net/maven'
         }
-        maven {
-            name = "sponge"
-            url "https://repo.spongepowered.org/maven"
-        }
-        jcenter()
     }
 
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-        classpath 'org.spongepowered:spongeapi:6.0.0'
     }
 }
 
 plugins {
-    id 'org.spongepowered.plugin' version '0.8.1'
     id 'net.minecrell.vanillagradle.server' version '2.2-3'
 }
 
@@ -30,6 +23,3 @@ minecraft {
     version = '<VERSION>'
     mappings = '<SNAPSHOTMAPPING>'
 }
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8

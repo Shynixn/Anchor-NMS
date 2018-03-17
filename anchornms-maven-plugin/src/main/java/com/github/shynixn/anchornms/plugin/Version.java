@@ -28,7 +28,9 @@ package com.github.shynixn.anchornms.plugin;
  * SOFTWARE.
  */
 public enum Version {
-    SPONGE_NMS_v1_11("1.11", "snapshot_20170120", "v1_11_mcpR1", "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\1.11\\snapshot\\20170120\\minecraft_serverSrc-1.11.jar");
+    //   MCP_VERSION_v1_11_R1("1.11", "snapshot_20170120", "v1_11_mcpR1");
+    MCP_VERSION_v1_10_R1("1.10", "stable_29", "v1_10_mcpR1"),
+    MCP_VERSION_v1_11_R1("1.11", "stable_32", "v1_11_mcpR1");
 
     private final String version;
     private final String packageVersion;
@@ -38,16 +40,20 @@ public enum Version {
     /**
      * Initializes a new version to be supported by this plugin.
      *
-     * @param version           version
-     * @param snapshotVersion   snapshotVersion
-     * @param packageVersion    packetVersion
-     * @param gradleInstallPath gradleInstallPath
+     * @param version         version
+     * @param snapshotVersion snapshotVersion
+     * @param packageVersion  packetVersion
      */
-    Version(String version, String snapshotVersion, String packageVersion, String gradleInstallPath) {
+    Version(String version, String snapshotVersion, String packageVersion) {
         this.version = version;
         this.packageVersion = packageVersion;
         this.snapshotVersion = snapshotVersion;
-        this.gradleInstallPath = gradleInstallPath;
+
+        if (this.snapshotVersion.startsWith("snapshot")) {
+            this.gradleInstallPath = "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\" + version + "\\snapshot\\" + snapshotVersion.split(java.util.regex.Pattern.quote("_"))[1] + "\\minecraft_serverSrc-" + version + ".jar";
+        } else {
+            this.gradleInstallPath = "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\" + version + "\\stable\\" + snapshotVersion.split(java.util.regex.Pattern.quote("_"))[1] + "\\minecraft_serverSrc-" + version + ".jar";
+        }
     }
 
     /**
@@ -93,7 +99,7 @@ public enum Version {
      * @return text
      */
     public static Version getVersionFromText(String versionText) {
-        for (Version version : Version.values()) {
+        for (final Version version : Version.values()) {
             if (version.getVersion().equals(versionText)) {
                 return version;
             }

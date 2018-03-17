@@ -9,6 +9,11 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,17 +93,16 @@ public class ActionSetupService implements AutoCloseable {
 
         this.log.info("Generating library " + version.getVersion() + " via ForgeGradle...");
 
-        this.gradleService.generateBuildGradleFor(version, true);
+        this.gradleService.generateBuildGradleFor(version);
         this.gradleService.executeCommand("setupDecompWorkspace");
 
         final File minecraftServerFile = new File(this.userHomer, version.getGradleInstallPath());
         FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);
 
-        this.gradleService.executeCommand("shadowJar");
-
-        FileUtils.moveFile(new File(this.devTools, "\\build\\libs\\nms-tools-all.jar"), targetLibraryFile);
-
-        FileUtils.deleteQuietly(temporaryLibraryFile);
+        final JarRelocator jarRelocator = JarRelocator.from(temporaryLibraryFile, targetLibraryFile, this.log);
+        final Map<String, String> pattern = new HashMap<>();
+        pattern.put("net.minecraft", "net.minecraft.server." + version.getPackageVersion());
+        jarRelocator.relocate(pattern);
 
         this.log.info("Generated " + targetLibraryFile.getName() + " in folder.");
         this.log.info("Finished checking library " + version.getVersion() + ". New library was created.");
@@ -131,7 +135,7 @@ public class ActionSetupService implements AutoCloseable {
         this.log.info("Obfuscating jar " + jarFile.getName() + " ...");
 
         final File tobeObfuscated = new File(this.devTools, TO_BE_OBFUSCATED_JAR);
-        File finalObfuscatedJar = null;
+        File finalObfuscatedJar;
         FileUtils.copyFile(jarFile, tobeObfuscated);
 
         for (final Version version : versions) {
@@ -139,12 +143,18 @@ public class ActionSetupService implements AutoCloseable {
             this.log.info("Relocating " + version.getVersion() + " ...");
             final Map<String, String> pattern = new HashMap<>();
             pattern.put("net.minecraft.server." + version.getPackageVersion(), "net.minecraft");
-            final JarRelocator jarRelocator = JarRelocator.from(tobeObfuscated, log);
-            jarRelocator.relocate(pattern);
-            this.log.info("Successfully relocated " + version.getVersion() + ".");
 
-            this.log.info("Obfuscating " + version.getVersion() + "via ForgeGradle...");
-            this.gradleService.generateBuildGradleFor(version, false);
+            try {
+                final JarRelocator jarRelocator = JarRelocator.from(tobeObfuscated, this.log);
+                jarRelocator.relocate(pattern);
+                this.log.info("Successfully relocated " + version.getVersion() + ".");
+            } catch (final Exception e) {
+                this.log.info("Relocating and obfuscating skipped.");
+                return;
+            }
+
+            this.log.info("Obfuscating " + version.getVersion() + " via ForgeGradle...");
+            this.gradleService.generateBuildGradleFor(version);
             this.gradleService.executeCommand("build");
             this.log.info("Finished ForgeGradle process.");
 
@@ -154,7 +164,7 @@ public class ActionSetupService implements AutoCloseable {
             }
 
             FileUtils.copyFile(finalObfuscatedJar, tobeObfuscated);
-         //   FileUtils.deleteQuietly(finalObfuscatedJar);
+            FileUtils.deleteQuietly(finalObfuscatedJar);
         }
 
         this.log.info("Replacing original jar file...");

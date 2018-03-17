@@ -179,7 +179,7 @@ public class JarRelocator {
         try {
             classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES);
         } catch (final Throwable e) {
-            this.log.error(e);
+            throw new RuntimeException(e);
         }
 
         final byte[] renamedClass = classWriter.toByteArray();

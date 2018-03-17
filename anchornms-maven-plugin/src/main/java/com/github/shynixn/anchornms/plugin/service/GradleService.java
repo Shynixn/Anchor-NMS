@@ -44,8 +44,8 @@ public class GradleService implements AutoCloseable {
     private static final String GRADLE_LOCAL = "gradle.jar";
     private static final String GRADLE_VERSION = "gradle-4.6";
 
-    private File buildFolder;
-    private Log log;
+    private final File buildFolder;
+    private final Log log;
 
     public GradleService(File buildFolder, Log log) {
         this.buildFolder = buildFolder;
@@ -58,15 +58,12 @@ public class GradleService implements AutoCloseable {
      * @param version version
      * @throws IOException exception
      */
-    public void generateBuildGradleFor(Version version, boolean prefix) throws IOException {
+    public void generateBuildGradleFor(Version version) throws IOException {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null!");
         }
 
-        String resource = "build.gradle.txt";
-        if (prefix) {
-            resource = "relocate-build.gradle.txt";
-        }
+        final String resource = "build.gradle.txt";
 
         final File buildGradleTargetFile = new File(this.buildFolder, "build.gradle");
         final URL buildGradleFile = Thread.currentThread().getContextClassLoader().getResource(resource);
@@ -78,7 +75,7 @@ public class GradleService implements AutoCloseable {
                 .replace("<PACKAGEVERSION>", version.getPackageVersion());
 
         FileUtils.write(buildGradleTargetFile, content, "UTF-8");
-        log.info("Updated build.gradle.");
+        this.log.info("Updated build.gradle.");
     }
 
     /**
@@ -99,7 +96,7 @@ public class GradleService implements AutoCloseable {
     }
 
     private void setupProjectGradle() throws IOException, ZipException, MojoFailureException, InterruptedException {
-        final File gradleDownloadFile = new File(buildFolder.getParentFile().getParentFile(), GRADLE_LOCAL);
+        final File gradleDownloadFile = new File(this.buildFolder.getParentFile().getParentFile(), GRADLE_LOCAL);
         if (!gradleDownloadFile.exists()) {
             this.log.info("Downloading gradle...");
             FileUtils.copyURLToFile(new URL(GRADLE_DOWNLOAD), gradleDownloadFile);
