@@ -125,12 +125,13 @@ in the end.
 </build>
 ```
 
-### Source jar and Target jar
+### Input jar and Output jar
 
 You can optionally define the input jar file which gets obfuscated and the output jar file.
 
 ```maven
 <build>
+    <plugins>
         <plugin>
              <groupId>com.github.shynixn.anchornms</groupId>
              <artifactId>anchornms-maven-plugin</artifactId>
