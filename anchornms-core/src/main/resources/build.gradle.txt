@@ -1,0 +1,25 @@
+buildscript {
+    repositories {
+        maven {
+            name = 'forge'
+            url = 'https://files.minecraftforge.net/maven'
+        }
+    }
+
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:<FORGEGRADLEVERSION>'
+    }
+}
+
+plugins {
+    id 'net.minecrell.vanillagradle.server' version '2.2-3'
+}
+
+jar {
+    from zipTree("to-be-obfuscated.jar")
+}
+
+minecraft {
+    version = '<VERSION>'
+    mappings = '<SNAPSHOTMAPPING>'
+}

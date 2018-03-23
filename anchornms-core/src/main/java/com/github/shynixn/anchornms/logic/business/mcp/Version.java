@@ -1,4 +1,4 @@
-package com.github.shynixn.anchornms.plugin;
+package com.github.shynixn.anchornms.logic.business.mcp;
 
 /**
  * Created by Shynixn 2018.

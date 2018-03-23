@@ -1,19 +1,17 @@
-package com.github.shynixn.anchornms.plugin.mojo;
+package com.github.shynixn.anchornms.plugin;
 
-import com.github.shynixn.anchornms.plugin.Version;
-import com.github.shynixn.anchornms.plugin.service.ActionSetupService;
+import com.github.shynixn.anchornms.logic.business.Factory;
+import com.github.shynixn.anchornms.logic.business.api.PluginServiceProvider;
+import com.github.shynixn.anchornms.logic.business.mcp.Version;
+import com.github.shynixn.anchornms.plugin.logger.LoggerBridge;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Shynixn 2018.
@@ -42,41 +40,35 @@ import java.util.List;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@Mojo(name = "obfuscate-jar", defaultPhase = LifecyclePhase.PACKAGE,  requiresDependencyResolution = ResolutionScope.RUNTIME )
-public class ObfuscatorMojo extends AbstractMojo {
+@Mojo(name = "generate-mcp-libraries")
+public class LibrariesInstallerMojo extends AbstractMojo {
 
     @Parameter(readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
     @Parameter
-    private String[] spongeVersions;
+    private String[] versions;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (this.spongeVersions == null) {
-            throw new MojoFailureException("Please specific the <spongeVersions> tag in the " +
-                    "<configuration> section.");
+        if (this.versions == null) {
+            throw new MojoFailureException("Please specific the <versions> tag in the " + "<configuration> section.");
         }
 
-        if (this.spongeVersions.length == 0) {
-            throw new MojoFailureException("No versions where specified in the  <spongeVersions> tag.");
+        if (this.versions.length == 0) {
+            throw new MojoFailureException("No versions where specified in the <versions> tag.");
         }
 
-        final File file = this.project.getArtifact().getFile();
-        if (file == null || !file.exists()) {
-            throw new MojoFailureException("Artifact jar does not exist!");
-        }
-
-        try (ActionSetupService devSourceSetupService = new ActionSetupService(new File(this.project.getBuild().getDirectory()), this.getLog())) {
-            final List<Version> versions = new ArrayList<>();
-            for (final String versionTag : this.spongeVersions) {
-                final Version version = Version.getVersionFromText(versionTag);
+        final File buildFolder = new File(this.project.getBuild().getDirectory());
+        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(buildFolder, new LoggerBridge(this.getLog()))) {
+            for (final String versionText : this.versions) {
+                final Version version = Version.getVersionFromText(versionText);
                 if (version == null) {
-                    throw new MojoFailureException("Version '" + version.getVersion() + "' could not be resolved!");
+                    throw new MojoFailureException("Version '" + versionText + "' could not be resolved!");
                 }
-                versions.add(version);
+
+                pluginServiceProvider.generateLibrary(version);
             }
-            devSourceSetupService.obfuscateJarFile(file, versions.toArray(new Version[versions.size()]));
         } catch (final Exception e) {
             throw new MojoFailureException(e.getMessage(), e);
         }

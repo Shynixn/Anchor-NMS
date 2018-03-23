@@ -1,16 +1,14 @@
-package com.github.shynixn.anchornms.plugin.service;
+package com.github.shynixn.anchornms.logic.business.service;
 
-import com.github.shynixn.anchornms.plugin.Version;
+import com.github.shynixn.anchornms.logic.business.mcp.Version;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 
 /**
  * Created by Shynixn 2018.
@@ -45,9 +43,9 @@ public class GradleService implements AutoCloseable {
     private static final String GRADLE_VERSION = "gradle-4.6";
 
     private final File buildFolder;
-    private final Log log;
+    private final Logger log;
 
-    public GradleService(File buildFolder, Log log) {
+    public GradleService(File buildFolder, Logger log) {
         this.buildFolder = buildFolder;
         this.log = log;
     }
@@ -85,10 +83,9 @@ public class GradleService implements AutoCloseable {
      * @param command command
      * @throws InterruptedException exception
      * @throws ZipException         exception
-     * @throws MojoFailureException exception
      * @throws IOException          exception
      */
-    public void executeCommand(String command) throws InterruptedException, ZipException, MojoFailureException, IOException {
+    public void executeCommand(String command) throws InterruptedException, ZipException, IOException {
         if (command == null) {
             throw new IllegalArgumentException("Commandcannot be null!");
         }
@@ -96,7 +93,7 @@ public class GradleService implements AutoCloseable {
         this.executeGradleCommand(this.buildFolder, command);
     }
 
-    private void setupProjectGradle() throws IOException, ZipException, MojoFailureException, InterruptedException {
+    private void setupProjectGradle() throws IOException, ZipException,  InterruptedException {
         final File gradleDownloadFile = new File(this.buildFolder.getParentFile().getParentFile(), GRADLE_LOCAL);
         if (!gradleDownloadFile.exists()) {
             this.log.info("Downloading gradle...");
@@ -114,11 +111,11 @@ public class GradleService implements AutoCloseable {
         }
     }
 
-    private void executeGradleCommand(File commandFolder, String command) throws IOException, InterruptedException, ZipException, MojoFailureException {
+    private void executeGradleCommand(File commandFolder, String command) throws IOException, InterruptedException, ZipException {
         this.executeGradleCommand(commandFolder, command, false);
     }
 
-    private void executeGradleCommand(File commandFolder, String command, boolean recursive) throws IOException, InterruptedException, ZipException, MojoFailureException {
+    private void executeGradleCommand(File commandFolder, String command, boolean recursive) throws IOException, InterruptedException, ZipException {
         final String winCommand = '"' + this.buildFolder.getAbsolutePath() + '\\' + GRADLE_VERSION + "\\bin\\gradle.bat" + '"';
         final String otherCommand = '"' + this.buildFolder.getAbsolutePath() + '\\' + GRADLE_VERSION + "\\bin\\gradle" + '"';
 
@@ -132,7 +129,7 @@ public class GradleService implements AutoCloseable {
                     this.setupProjectGradle();
                     this.executeGradleCommand(commandFolder, command, true);
                 } else {
-                    throw new MojoFailureException("Failed to execute gradle command.", e);
+                    throw new RuntimeException("Failed to execute gradle command.", e);
                 }
             }
         }

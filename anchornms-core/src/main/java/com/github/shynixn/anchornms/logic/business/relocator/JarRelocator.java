@@ -1,16 +1,18 @@
-package com.github.shynixn.anchornms.plugin.relocator;
+package com.github.shynixn.anchornms.logic.business.relocator;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
-import org.codehaus.plexus.util.IOUtil;
+import org.apache.commons.io.IOUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.RemappingClassAdapter;
+import org.slf4j.Logger;
 
 import java.io.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -49,7 +51,7 @@ public class JarRelocator {
     private final File outputFile;
 
     private final boolean temp;
-    private final Log log;
+    private final Logger logger;
 
     /**
      * Initializes a new relocator with the given parameters.
@@ -57,9 +59,9 @@ public class JarRelocator {
      * @param inputFile  inputFile
      * @param outputFile outputFile
      * @param temp       temp
-     * @param log        log
+     * @param logger     log
      */
-    public JarRelocator(File inputFile, File outputFile, boolean temp, Log log) {
+    public JarRelocator(File inputFile, File outputFile, boolean temp, Logger logger) {
         if (inputFile == null) {
             throw new IllegalArgumentException("InputFile cannot be null!");
         }
@@ -68,17 +70,17 @@ public class JarRelocator {
             throw new IllegalArgumentException("OuputFile cannot be null!");
         }
 
-        if (log == null) {
-            throw new IllegalArgumentException("Log cannot be null!");
+        if (logger == null) {
+            throw new IllegalArgumentException("Logger cannot be null!");
         }
 
         this.inputFile = inputFile;
-        this.log = log;
+        this.logger = logger;
         this.outputFile = outputFile;
         this.temp = temp;
     }
 
-    public void relocate(Map<String, String> patternMap) throws MojoFailureException {
+    public void relocate(Map<String, String> patternMap) {
         if (patternMap == null) {
             throw new IllegalArgumentException("PatternMap cannot be null!");
         }
@@ -89,7 +91,6 @@ public class JarRelocator {
 
         try (JarOutputStream jarOutputStream = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(this.outputFile)))) {
             final Set<String> resources = new HashSet<>();
-
             final PatternRemapper remapper = new PatternRemapper(patternMap);
 
             try (final JarFile jarFile = new JarFile(this.inputFile)) {
@@ -105,15 +106,15 @@ public class JarRelocator {
             }
 
         } catch (final IOException e) {
-            this.log.error(e);
-            throw new MojoFailureException(e.getMessage(), e);
+            this.logger.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
 
         if (this.temp) {
             try {
                 this.replaceTempFile();
             } catch (final IOException e) {
-                throw new MojoFailureException(e.getMessage(), e);
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
     }
@@ -145,7 +146,7 @@ public class JarRelocator {
 
     private void addResource(final Set<String> resources, final JarOutputStream jos, final String name, final InputStream is) throws IOException {
         jos.putNextEntry(new JarEntry(name));
-        IOUtil.copy(is, jos);
+        IOUtils.copy(is, jos);
         resources.add(name);
     }
 
@@ -166,9 +167,9 @@ public class JarRelocator {
         if (!remapper.hasPatterns()) {
             try {
                 jos.putNextEntry(new JarEntry(name));
-                IOUtil.copy(is, jos);
+                IOUtils.copy(is, jos);
             } catch (final ZipException e) {
-                this.log.error(e);
+                this.logger.error("Failed to zip files.",e);
             }
         }
 
@@ -187,17 +188,17 @@ public class JarRelocator {
 
         try {
             jos.putNextEntry(new JarEntry(mappedName + ".class"));
-            IOUtil.copy(renamedClass, jos);
+            IOUtils.write(renamedClass, jos);
         } catch (final ZipException e) {
-            this.log.error(e);
+            this.logger.error(e.getMessage(), e);
         }
     }
 
-    public static JarRelocator from(File jarFile, Log log) {
+    public static JarRelocator from(File jarFile, Logger log) {
         return new JarRelocator(jarFile, new File(jarFile.getParent(), jarFile.getName() + "-relocate-temp.jar"), true, log);
     }
 
-    public static JarRelocator from(File inputJarFile, File outPutJarFile, Log log) {
+    public static JarRelocator from(File inputJarFile, File outPutJarFile, Logger log) {
         return new JarRelocator(inputJarFile, outPutJarFile, false, log);
     }
 }

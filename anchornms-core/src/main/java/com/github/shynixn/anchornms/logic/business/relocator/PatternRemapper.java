@@ -1,4 +1,4 @@
-package com.github.shynixn.anchornms.plugin.relocator;
+package com.github.shynixn.anchornms.logic.business.relocator;
 
 import org.objectweb.asm.commons.Remapper;
 

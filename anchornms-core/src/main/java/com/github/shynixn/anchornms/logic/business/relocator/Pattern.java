@@ -1,4 +1,4 @@
-package com.github.shynixn.anchornms.plugin.relocator;
+package com.github.shynixn.anchornms.logic.business.relocator;
 
 /**
  * Created by Shynixn 2018.
@@ -27,7 +27,7 @@ package com.github.shynixn.anchornms.plugin.relocator;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class Pattern {
+class Pattern {
     private static final int CLASS_LENGTH = 6;
 
     private final String pattern;
@@ -35,7 +35,8 @@ public class Pattern {
     private final String patternPath;
     private final String newPatternPath;
 
-    public Pattern(String pattern, String newPattern) {
+    Pattern(String pattern, String newPattern) {
+        super();
         this.pattern = pattern.replace('/', '.');
         this.patternPath = pattern.replace('.', '/');
 
@@ -43,11 +44,6 @@ public class Pattern {
         this.newPatternPath = newPattern.replace('.', '/');
     }
 
-    /**
-     * Relocates the path
-     * @param path
-     * @return
-     */
     public String relocatePath(final String path) {
         return path.replaceFirst(this.patternPath, this.newPatternPath);
     }
