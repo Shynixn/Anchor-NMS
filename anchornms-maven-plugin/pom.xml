@@ -23,7 +23,7 @@
     </build>
 
     <artifactId>anchornms-maven-plugin</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -69,16 +69,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>asm</groupId>
+            <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>3.3.1</version>
+            <version>5.0.4</version>
         </dependency>
         <dependency>
-            <groupId>asm</groupId>
+            <groupId>org.ow2.asm</groupId>
             <artifactId>asm-commons</artifactId>
-            <version>3.3.1</version>
+            <version>5.0.4</version>
         </dependency>
-
     </dependencies>
 
 </project>

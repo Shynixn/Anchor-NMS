@@ -72,6 +72,7 @@ public class GradleService implements AutoCloseable {
         String content = FileUtils.readFileToString(buildGradleTargetFile, "UTF-8");
         content = content.replace("<SNAPSHOTMAPPING>", version.getSnapshotVersion())
                 .replace("<VERSION>", version.getVersion())
+                .replace("<FORGEGRADLEVERSION>", version.getForgeGradleVersion())
                 .replace("<PACKAGEVERSION>", version.getPackageVersion());
 
         FileUtils.write(buildGradleTargetFile, content, "UTF-8");
