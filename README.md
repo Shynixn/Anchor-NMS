@@ -5,6 +5,8 @@
 | master        | [![Build Status](https://travis-ci.org/Shynixn/Anchor-NMS.svg?branch=master)](https://travis-ci.org/Shynixn/Anchor-NMS) |[Download latest release (recommend)](https://github.com/Shynixn/Anchor-NMS/releases)|
 | development   | [![Build Status](https://travis-ci.org/Shynixn/Anchor-NMS.svg?branch=development)](https://travis-ci.org/Shynixn/Anchor-NMS) | [Download snapshots](https://oss.sonatype.org/content/repositories/snapshots/com/github/shynixn/anchornms/anchornms-maven-plugin) |
 
+JavaDocs: https://shynixn.github.io/Anchor-NMS/apidocs/
+
 ## Description
 
 AnchorNMS is a maven plugin which is designed to internally use the mod development framework ForgeGradle for 

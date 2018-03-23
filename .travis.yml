@@ -1,0 +1,11 @@
+language: java
+sudo: true
+install:
+    - cd /home/travis/build/Shynixn/Anchor-NMS/
+script:
+    - mvn install
+jdk:
+  - oraclejdk8
+#jdk
+
+

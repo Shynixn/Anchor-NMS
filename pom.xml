@@ -165,4 +165,21 @@
         </dependency>
     </dependencies>
 
+    <scm>
+        <connection>scm:git:git://github.com/Shynixn/Anchor-NMS.git</connection>
+        <developerConnection>scm:git:ssh://github.com:Shynixn/Anchor-NMS.git</developerConnection>
+        <url>http://github.com/Shynixn/Anchor-NMS.git/tree/master</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
 </project>
