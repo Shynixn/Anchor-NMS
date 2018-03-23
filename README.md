@@ -23,7 +23,7 @@ Also, you can include it at any part of your build cycle as described below.
 
 ## Useage
 
-The plugin will be available in the central maven repository.
+The plugin is available in the central maven repository.
 
 ### Getting the libraries
 

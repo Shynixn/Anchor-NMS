@@ -10,7 +10,7 @@
     <description>AnchorNMS is a maven plugin which is designed to internally use the mod development framework ForgeGradle for mod development with Maven.</description>
     <url>https://github.com/Shynixn/Anchor-NMS</url>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <modules>
         <module>anchornms-maven-plugin</module>
