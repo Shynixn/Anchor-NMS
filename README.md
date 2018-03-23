@@ -23,7 +23,7 @@ Also, you can include it at any part of your build cycle as described below.
 
 The plugin will be available in the central maven repository.
 
-## Getting the libraries
+### Getting the libraries
 
 1. Insert the following into your pom.xml.
 
@@ -70,7 +70,7 @@ mvn anchornms:generate-mcp-libraries
  }
 ```
 
-## Building the project
+### Building the project
 
 Make sure you have the plugin above included into your pom.xml.
 
@@ -81,7 +81,7 @@ mvn package
 ```
 Congrats the your jar file is now correctly obfuscated again.
 
-## Dependencies and relocating
+### Dependencies and relocating
 
 Often you have to shade dependencies in your final jar or even relocate them. This is fully support
 as only your jar file in the target folder gets obfuscated by the obfuscation goal.
