@@ -7,11 +7,123 @@
 
 ## Description
 
+AnchorNMS is a maven plugin which is designed to internally use the mod development framework ForgeGradle for 
+mod development with Maven.
+
+Compared to ForgeGradle it offers **easy** integration into any existing Multi Module Java Projects. 
+Also, you can include it at any part of your build cycle as described below.
+
 ## Features
+
+* Plugin goal to generate mcp libraries for 1.12, 1.11 and 1.10 
+* Plugin goal which automatically obfuscates your generated .jar file
+* Multi version support in one Module as class paths get relocated and restored
 
 ## Useage
 
-## Screenshots
+The plugin will be available in the central maven repository.
+
+## Getting the libraries
+
+1. Insert the following into your pom.xml.
+
+```maven
+  <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.shynixn.anchornms</groupId>
+                <artifactId>anchornms-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>obfuscate-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <versions>
+                        <version>1.12</version>
+                    </versions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+```
+
+2. Define your versions you want to generate and use.
+
+3. Execute the following goal to generate your libraries. 
+
+```maven
+mvn anchornms:generate-mcp-libraries
+```
+
+4. After you can find the library files in your target/nms-tools folder called mcp-1.12.jar or mcp-<version>.jar
+5. Copy these library files anywhere on your pc or install it into your maven cache and include it into your project.
+6. Now you can use the classes for this version.
+
+```java
+ public void manipulateArmorstand() {
+    net.minecraft.server.v1_12_mcpR1.entity.item.EntityArmorStand armorStand;
+    armorStand.setSilent(true);
+ }
+```
+
+## Building the project
+
+Make sure you have the plugin above included into your pom.xml.
+
+The obfuscate goal gets automatically applied and is bound per default to the phase package.
+
+```maven
+mvn package
+```
+Congrats the your jar file is now correctly obfuscated again.
+
+## Dependencies and relocating
+
+Often you have to shade dependencies in your final jar or even relocate them. This is fully support
+as only your jar file in the target folder gets obfuscated by the obfuscation goal.
+
+This means you simply include the plugin after you shaded your jar, so your shaded jar gets obfuscated
+in the end.
+
+```maven
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+             <groupId>com.github.shynixn.anchornms</groupId>
+             <artifactId>anchornms-maven-plugin</artifactId>
+             <version>1.0</version>
+             <executions>
+                 <execution>
+                     <goals>
+                         <goal>obfuscate-jar</goal>
+                     </goals>
+                 </execution>
+             </executions>
+             <configuration>
+                 <versions>
+                     <version>1.12</version>
+                 </versions>
+             </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
 
 ## Licence
 
