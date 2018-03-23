@@ -79,7 +79,7 @@ The obfuscate goal gets automatically applied and is bound per default to the ph
 ```maven
 mvn package
 ```
-Congrats, the jar file is now correctly obfuscated again.
+Congrats, the jar file is now correctly obfuscated.
 
 ### Dependencies and relocating
 
@@ -116,6 +116,35 @@ in the end.
                  </execution>
              </executions>
              <configuration>
+                 <versions>
+                     <version>1.12</version>
+                 </versions>
+             </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+### Source jar and Target jar
+
+You can optionally define the input jar file which gets obfuscated and the output jar file.
+
+```maven
+<build>
+        <plugin>
+             <groupId>com.github.shynixn.anchornms</groupId>
+             <artifactId>anchornms-maven-plugin</artifactId>
+             <version>1.0</version>
+             <executions>
+                 <execution>
+                     <goals>
+                         <goal>obfuscate-jar</goal>
+                     </goals>
+                 </execution>
+             </executions>
+             <configuration>
+                <inputFile>SomePath/MyJar.jar</inputFile>
+                <outputFile>SomePath/MyFinalJar.jar</outputFile>
                  <versions>
                      <version>1.12</version>
                  </versions>
