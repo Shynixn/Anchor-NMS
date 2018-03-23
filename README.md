@@ -25,7 +25,7 @@ The plugin will be available in the central maven repository.
 
 ### Getting the libraries
 
-1. Insert the following into your pom.xml.
+1. Insert the following lines into your pom.xml.
 
 ```maven
   <build>
@@ -59,13 +59,13 @@ The plugin will be available in the central maven repository.
 mvn anchornms:generate-mcp-libraries
 ```
 
-4. After you can find the library files in your target/nms-tools folder called mcp-1.12.jar or mcp-<version>.jar
+4. After that, you can find the library files in your target/nms-tools folder called mcp-1.12.jar or mcp-any-version.jar
 5. Copy these library files anywhere on your pc or install it into your maven cache and include it into your project.
 6. Now you can use the classes for this version.
 
 ```java
  public void manipulateArmorstand() {
-    net.minecraft.server.v1_12_mcpR1.entity.item.EntityArmorStand armorStand;
+    net.minecraft.anchor.v1_12_mcpR1.entity.item.EntityArmorStand armorStand;
     armorStand.setSilent(true);
  }
 ```
@@ -79,14 +79,14 @@ The obfuscate goal gets automatically applied and is bound per default to the ph
 ```maven
 mvn package
 ```
-Congrats the your jar file is now correctly obfuscated again.
+Congrats, the jar file is now correctly obfuscated again.
 
 ### Dependencies and relocating
 
-Often you have to shade dependencies in your final jar or even relocate them. This is fully support
+Often you have to shade dependencies into your final jar file or even relocate them. This is fully supported
 as only your jar file in the target folder gets obfuscated by the obfuscation goal.
 
-This means you simply include the plugin after you shaded your jar, so your shaded jar gets obfuscated
+This means you can simply include the plugin after your shading plugin, so your shaded jar gets obfuscated
 in the end.
 
 ```maven
