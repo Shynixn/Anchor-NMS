@@ -28,7 +28,6 @@ package com.github.shynixn.anchornms.plugin;
  * SOFTWARE.
  */
 public enum Version {
-    //   MCP_VERSION_v1_11_R1("1.11", "snapshot_20170120", "v1_11_mcpR1");
     MCP_VERSION_v1_10_R1("1.10", "stable_29", "v1_10_mcpR1","2.2-SNAPSHOT"),
     MCP_VERSION_v1_11_R1("1.11", "stable_32", "v1_11_mcpR1","2.2-SNAPSHOT"),
     MCP_VERSION_v1_12_R1("1.12", "snapshot_20180323", "v1_12_mcpR1", "2.3-SNAPSHOT");
