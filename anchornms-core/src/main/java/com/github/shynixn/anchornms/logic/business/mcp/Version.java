@@ -1,5 +1,7 @@
 package com.github.shynixn.anchornms.logic.business.mcp;
 
+import java.io.File;
+
 /**
  * Created by Shynixn 2018.
  * <p>
@@ -35,7 +37,6 @@ public enum Version {
     private final String version;
     private final String packageVersion;
     private final String snapshotVersion;
-    private final String gradleInstallPath;
     private final String forgeGradleVersion;
 
     /**
@@ -50,12 +51,6 @@ public enum Version {
         this.packageVersion = packageVersion;
         this.snapshotVersion = snapshotVersion;
         this.forgeGradleVersion = forgeGradleVersion;
-
-        if (this.snapshotVersion.startsWith("snapshot")) {
-            this.gradleInstallPath = "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\" + version + "\\snapshot\\" + snapshotVersion.split(java.util.regex.Pattern.quote("_"))[1] + "\\minecraft_serverSrc-" + version + ".jar";
-        } else {
-            this.gradleInstallPath = "gradle\\caches\\minecraft\\net\\minecraft\\minecraft_server\\" + version + "\\stable\\" + snapshotVersion.split(java.util.regex.Pattern.quote("_"))[1] + "\\minecraft_serverSrc-" + version + ".jar";
-        }
     }
 
     /**
@@ -90,8 +85,8 @@ public enum Version {
      *
      * @return path
      */
-    public String getGradleInstallPath() {
-        return this.gradleInstallPath;
+    public String getGradleInstallPath(File devFolder) {
+        return devFolder.getAbsolutePath() + "/.gradle/minecraft/minecraft_serverSrc-"+version + "-PROJECT(nms-tools).jar";
     }
 
     /**

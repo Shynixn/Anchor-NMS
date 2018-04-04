@@ -48,16 +48,18 @@ public class ActionSetupService implements PluginServiceProvider {
 
     private final File userHomer = new File(System.getProperty("user.home"));
     private final File devTools;
+    private final File metaInfFolder;
 
     private final GradleService gradleService;
 
     /**
      * Initializes a new setup service with the targetFolder and logger.
      *
+     * @param sourceFolder sourceFolder
      * @param targetFolder targetFolder
      * @param log          logger
      */
-    public ActionSetupService(File targetFolder, Logger log) {
+    public ActionSetupService(File sourceFolder, File targetFolder, Logger log) {
         super();
         if (targetFolder == null) {
             throw new IllegalArgumentException("Folder cannot be null!");
@@ -69,6 +71,10 @@ public class ActionSetupService implements PluginServiceProvider {
 
         this.log = log;
         this.devTools = new File(targetFolder, DEV_FOLDER);
+
+        this.log.info("ORIGIN: " + sourceFolder);
+        this.metaInfFolder = new File(sourceFolder, "../resources/META-INF");
+
         if (!this.devTools.exists()) {
             this.devTools.mkdir();
         }
@@ -94,13 +100,62 @@ public class ActionSetupService implements PluginServiceProvider {
             return;
         }
 
+        this.log.info("Searching for access transformers  " + version.getVersion() + "_xxx_at.cfg ...");
+
+        this.log.info("FOLDER .. ." + metaInfFolder.getAbsolutePath());
+
+        if (metaInfFolder.exists()) {
+            for (File file : metaInfFolder.listFiles()) {
+                this.log.info(file.getName() + " --- " + version.getVersion());
+                if (file.getName().startsWith(version.getVersion())) {
+                    this.log.info("Found access transformers " + file.getName() + ".");
+
+                    final File buildFolder = new File(devTools, "src");
+                    if (! buildFolder .exists()) {
+                        buildFolder .mkdir();
+                    }
+
+                    final File classesFolder = new File(buildFolder, "main");
+                    if (! classesFolder .exists()) {
+                        classesFolder.mkdir();
+                    }
+
+                    log.info(classesFolder.getAbsolutePath());
+
+                    final File mainFolder = new File(classesFolder, "resources");
+                    if (! mainFolder .exists()) {
+                        mainFolder.mkdir();
+                    }
+
+                    log.info(mainFolder.getAbsolutePath());
+
+
+                    File resourcesFolder = new File(mainFolder, "META-INF");
+                    if (!resourcesFolder.exists()) {
+                        resourcesFolder.mkdir();
+                    }
+
+                    log.info(resourcesFolder.getAbsolutePath());
+
+
+                    try {
+                        FileUtils.copyFile(file, new File(resourcesFolder, file.getName()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        }
+
         this.log.info("Generating library " + version.getVersion() + " via ForgeGradle...");
 
         try {
             this.gradleService.generateBuildGradleFor(version);
             this.gradleService.executeCommand("setupDecompWorkspace");
 
-            final File minecraftServerFile = new File(this.userHomer, version.getGradleInstallPath());
+            final File minecraftServerFile = new File(version.getGradleInstallPath(devTools));
+            this.log.info("MINECRAFT SOURCE: " + minecraftServerFile);
             FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);
         } catch (IOException | InterruptedException | ZipException e) {
             throw new RuntimeException(e);

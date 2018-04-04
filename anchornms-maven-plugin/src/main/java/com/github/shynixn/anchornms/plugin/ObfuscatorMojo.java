@@ -91,7 +91,8 @@ public class ObfuscatorMojo extends AbstractMojo {
         }
 
         final File buildFolder = new File(this.project.getBuild().getDirectory());
-        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(buildFolder, new LoggerBridge(this.getLog()))) {
+        final File sourceFolder = new File(this.project.getBuild().getSourceDirectory());
+        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(sourceFolder,buildFolder, new LoggerBridge(this.getLog()))) {
             final List<Version> versions = new ArrayList<>();
             for (final String versionText : this.versions) {
                 final Version version = com.github.shynixn.anchornms.logic.business.mcp.Version.getVersionFromText(versionText);
