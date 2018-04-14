@@ -42,9 +42,10 @@ public interface PluginServiceProvider extends AutoCloseable {
 
     /**
      * Obfuscates the given inputJar with the given versions and generates the output jar. Input and output jar can be the same.
-     * @param inputJar inputJar
+     *
+     * @param inputJar  inputJar
      * @param outputJar outPutJar
-     * @param versions versions
+     * @param versions  versions
      */
     void obfuscateJar(File inputJar, File outputJar, Version... versions);
 }

@@ -137,6 +137,6 @@ public class GradleService implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        this.executeGradleCommand(this.buildFolder, "--stop");
+      this.executeGradleCommand(this.buildFolder, "--stop");
     }
 }

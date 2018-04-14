@@ -86,7 +86,7 @@ public enum Version {
      * @return path
      */
     public String getGradleInstallPath(File devFolder) {
-        return devFolder.getAbsolutePath() + "/.gradle/minecraft/minecraft_serverSrc-"+version + "-PROJECT(nms-tools).jar";
+        return devFolder.getAbsolutePath() + "/.gradle/minecraft/minecraft_serverSrc-"+ this.version + "-PROJECT(nms-tools).jar";
     }
 
     /**

@@ -86,6 +86,7 @@ public class ActionSetupService implements PluginServiceProvider {
      *
      * @param version version
      */
+    @Override
     public void generateLibrary(Version version) {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null!");
@@ -102,50 +103,43 @@ public class ActionSetupService implements PluginServiceProvider {
 
         this.log.info("Searching for access transformers  " + version.getVersion() + "_xxx_at.cfg ...");
 
-        this.log.info("FOLDER .. ." + metaInfFolder.getAbsolutePath());
-
-        if (metaInfFolder.exists()) {
-            for (File file : metaInfFolder.listFiles()) {
+        if (this.metaInfFolder.exists()) {
+            for (final File file : this.metaInfFolder.listFiles()) {
                 this.log.info(file.getName() + " --- " + version.getVersion());
                 if (file.getName().startsWith(version.getVersion())) {
-                    this.log.info("Found access transformers " + file.getName() + ".");
-
-                    final File buildFolder = new File(devTools, "src");
-                    if (! buildFolder .exists()) {
-                        buildFolder .mkdir();
+                    final File buildFolder = new File(this.devTools, "src");
+                    if (!buildFolder.exists()) {
+                        buildFolder.mkdir();
                     }
 
                     final File classesFolder = new File(buildFolder, "main");
-                    if (! classesFolder .exists()) {
+                    if (!classesFolder.exists()) {
                         classesFolder.mkdir();
                     }
 
-                    log.info(classesFolder.getAbsolutePath());
+                    this.log.info(classesFolder.getAbsolutePath());
 
                     final File mainFolder = new File(classesFolder, "resources");
-                    if (! mainFolder .exists()) {
+                    if (!mainFolder.exists()) {
                         mainFolder.mkdir();
                     }
 
-                    log.info(mainFolder.getAbsolutePath());
+                    this.log.info(mainFolder.getAbsolutePath());
 
-
-                    File resourcesFolder = new File(mainFolder, "META-INF");
+                    final File resourcesFolder = new File(mainFolder, "META-INF");
                     if (!resourcesFolder.exists()) {
                         resourcesFolder.mkdir();
                     }
 
-                    log.info(resourcesFolder.getAbsolutePath());
-
+                    this.log.info(resourcesFolder.getAbsolutePath());
 
                     try {
                         FileUtils.copyFile(file, new File(resourcesFolder, file.getName()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } catch (final IOException e) {
+                        this.log.error(e.getMessage(), e);
                     }
                 }
             }
-
         }
 
         this.log.info("Generating library " + version.getVersion() + " via ForgeGradle...");
@@ -154,8 +148,7 @@ public class ActionSetupService implements PluginServiceProvider {
             this.gradleService.generateBuildGradleFor(version);
             this.gradleService.executeCommand("setupDecompWorkspace");
 
-            final File minecraftServerFile = new File(version.getGradleInstallPath(devTools));
-            this.log.info("MINECRAFT SOURCE: " + minecraftServerFile);
+            final File minecraftServerFile = new File(version.getGradleInstallPath(this.devTools));
             FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);
         } catch (IOException | InterruptedException | ZipException e) {
             throw new RuntimeException(e);
@@ -186,6 +179,7 @@ public class ActionSetupService implements PluginServiceProvider {
      * @param inputJarFile  input
      * @param outputJarFile output
      */
+    @Override
     public void obfuscateJar(File inputJarFile, File outputJarFile, Version... versions) {
         if (inputJarFile == null || outputJarFile == null) {
             throw new IllegalArgumentException("Define an input and an outputJar!");
