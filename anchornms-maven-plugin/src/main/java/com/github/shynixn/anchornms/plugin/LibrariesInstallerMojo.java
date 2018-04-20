@@ -49,6 +49,9 @@ public class LibrariesInstallerMojo extends AbstractMojo {
     @Parameter
     private String[] versions;
 
+    @Parameter
+    private String accessTransformer;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.versions == null) {
@@ -61,7 +64,7 @@ public class LibrariesInstallerMojo extends AbstractMojo {
 
         final File buildFolder = new File(this.project.getBuild().getDirectory());
         final File sourceFolder = new File(this.project.getBuild().getSourceDirectory());
-        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(sourceFolder,buildFolder, new LoggerBridge(this.getLog()))) {
+        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(sourceFolder, buildFolder, accessTransformer, new LoggerBridge(this.getLog()))) {
             for (final String versionText : this.versions) {
                 final Version version = Version.getVersionFromText(versionText);
                 if (version == null) {

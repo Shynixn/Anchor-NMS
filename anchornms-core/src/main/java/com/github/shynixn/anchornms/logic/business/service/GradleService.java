@@ -51,9 +51,16 @@ public class GradleService implements AutoCloseable {
      * @param version version
      * @throws IOException exception
      */
-    public void generateBuildGradleFor(Version version) throws IOException {
+    public void generateBuildGradleFor(Version version, String accessTransformer) throws IOException {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null!");
+        }
+
+        final String transform;
+        if (accessTransformer == null) {
+            transform = "";
+        } else {
+            transform = "manifest.attributes('FMLAT': '" + accessTransformer + "')";
         }
 
         final String resource = "build.gradle.txt";
@@ -66,6 +73,7 @@ public class GradleService implements AutoCloseable {
         content = content.replace("<SNAPSHOTMAPPING>", version.getSnapshotVersion())
                 .replace("<VERSION>", version.getVersion())
                 .replace("<FORGEGRADLEVERSION>", version.getForgeGradleVersion())
+                .replace("<ACCESSTRANSFORMER>", transform)
                 .replace("<PACKAGEVERSION>", version.getPackageVersion());
 
         FileUtils.write(buildGradleTargetFile, content, "UTF-8");
@@ -88,7 +96,7 @@ public class GradleService implements AutoCloseable {
         this.executeGradleCommand(this.buildFolder, command);
     }
 
-    private void setupProjectGradle() throws IOException, ZipException,  InterruptedException {
+    private void setupProjectGradle() throws IOException, ZipException, InterruptedException {
         this.executeGradleCommand(this.buildFolder, "wrapper", true);
     }
 
@@ -137,6 +145,6 @@ public class GradleService implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-      this.executeGradleCommand(this.buildFolder, "--stop");
+        this.executeGradleCommand(this.buildFolder, "--stop");
     }
 }

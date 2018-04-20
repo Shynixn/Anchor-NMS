@@ -17,6 +17,7 @@ plugins {
 
 jar {
     from zipTree("to-be-obfuscated.jar")
+    <ACCESSTRANSFORMER>
 }
 
 minecraft {

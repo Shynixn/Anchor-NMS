@@ -49,6 +49,7 @@ public class ActionSetupService implements PluginServiceProvider {
     private final File userHomer = new File(System.getProperty("user.home"));
     private final File devTools;
     private final File metaInfFolder;
+    private final String accessTransformer;
 
     private final GradleService gradleService;
 
@@ -59,7 +60,7 @@ public class ActionSetupService implements PluginServiceProvider {
      * @param targetFolder targetFolder
      * @param log          logger
      */
-    public ActionSetupService(File sourceFolder, File targetFolder, Logger log) {
+    public ActionSetupService(File sourceFolder, File targetFolder, String accessTransformer, Logger log) {
         super();
         if (targetFolder == null) {
             throw new IllegalArgumentException("Folder cannot be null!");
@@ -69,10 +70,11 @@ public class ActionSetupService implements PluginServiceProvider {
             throw new IllegalArgumentException("Logger cannot be null!");
         }
 
+        this.accessTransformer = accessTransformer;
+
         this.log = log;
         this.devTools = new File(targetFolder, DEV_FOLDER);
 
-        this.log.info("ORIGIN: " + sourceFolder);
         this.metaInfFolder = new File(sourceFolder, "../resources/META-INF");
 
         if (!this.devTools.exists()) {
@@ -145,7 +147,7 @@ public class ActionSetupService implements PluginServiceProvider {
         this.log.info("Generating library " + version.getVersion() + " via ForgeGradle...");
 
         try {
-            this.gradleService.generateBuildGradleFor(version);
+            this.gradleService.generateBuildGradleFor(version, accessTransformer);
             this.gradleService.executeCommand("setupDecompWorkspace");
 
             final File minecraftServerFile = new File(version.getGradleInstallPath(this.devTools));
@@ -220,7 +222,7 @@ public class ActionSetupService implements PluginServiceProvider {
 
             try {
                 this.log.info("Obfuscating " + version.getVersion() + " via ForgeGradle...");
-                this.gradleService.generateBuildGradleFor(version);
+                this.gradleService.generateBuildGradleFor(version, accessTransformer);
                 this.gradleService.executeCommand("build");
             } catch (IOException | InterruptedException | ZipException e) {
                 throw new RuntimeException(e);

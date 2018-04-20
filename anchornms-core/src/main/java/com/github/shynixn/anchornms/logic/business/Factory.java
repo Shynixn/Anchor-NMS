@@ -42,7 +42,7 @@ public class Factory {
      * @param logger           logger implementing slf4j
      * @return service
      */
-    public static PluginServiceProvider createPluginServiceProvider(File sourceDirectory, File workingDirectory, Logger logger) {
-        return new ActionSetupService(sourceDirectory, workingDirectory, logger);
+    public static PluginServiceProvider createPluginServiceProvider(File sourceDirectory, File workingDirectory, String accessTransformer, Logger logger) {
+        return new ActionSetupService(sourceDirectory, workingDirectory,accessTransformer, logger);
     }
 }
