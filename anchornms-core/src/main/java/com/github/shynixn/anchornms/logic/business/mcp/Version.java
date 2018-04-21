@@ -1,7 +1,5 @@
 package com.github.shynixn.anchornms.logic.business.mcp;
 
-import java.io.File;
-
 /**
  * Created by Shynixn 2018.
  * <p>
@@ -30,14 +28,15 @@ import java.io.File;
  * SOFTWARE.
  */
 public enum Version {
-    MCP_VERSION_v1_10_R1("1.10", "stable_29", "v1_10_mcpR1","2.2-SNAPSHOT"),
-    MCP_VERSION_v1_11_R1("1.11", "stable_32", "v1_11_mcpR1","2.2-SNAPSHOT"),
+    MCP_VERSION_v1_10_R1("1.10", "stable_29", "v1_10_mcpR1", "2.2-SNAPSHOT"),
+    MCP_VERSION_v1_11_R1("1.11", "stable_32", "v1_11_mcpR1", "2.2-SNAPSHOT"),
     MCP_VERSION_v1_12_R1("1.12", "snapshot_20180323", "v1_12_mcpR1", "2.3-SNAPSHOT");
 
     private final String version;
     private final String packageVersion;
     private final String snapshotVersion;
     private final String forgeGradleVersion;
+    private final String gradleInstallPath;
 
     /**
      * Initializes a new version to be supported by this plugin.
@@ -51,6 +50,12 @@ public enum Version {
         this.packageVersion = packageVersion;
         this.snapshotVersion = snapshotVersion;
         this.forgeGradleVersion = forgeGradleVersion;
+
+        if (this.snapshotVersion.startsWith("snapshot")) {
+            this.gradleInstallPath = System.getProperty("user.home") + "/gradle/caches/minecraft/net/minecraft/minecraft_server/" + version + "/snapshot/" + snapshotVersion.split(java.util.regex.Pattern.quote("_"))[1] + "/minecraft_serverSrc-" + version + ".jar";
+        } else {
+            this.gradleInstallPath = System.getProperty("user.home") + "/gradle/caches/minecraft/net/minecraft/minecraft_server/" + version + "/stable/" + snapshotVersion.split(java.util.regex.Pattern.quote("_"))[1] + "/minecraft_serverSrc-" + version + ".jar";
+        }
     }
 
     /**
@@ -85,8 +90,8 @@ public enum Version {
      *
      * @return path
      */
-    public String getGradleInstallPath(File devFolder) {
-        return devFolder.getAbsolutePath() + "/.gradle/minecraft/minecraft_serverSrc-"+ this.version + "-PROJECT(nms-tools).jar";
+    public String getGradleInstallPath() {
+        return this.gradleInstallPath;
     }
 
     /**
