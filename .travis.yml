@@ -2,8 +2,13 @@ language: java
 sudo: true
 install:
     - cd /home/travis/build/Shynixn/Anchor-NMS/
+    - mkdir lib
 script:
     - mvn install
+    - cd /home/travis/build/Shynixn/Anchor-NMS/anchor-nms-travistest
+    - mvn anchornms:generate-mcp-libraries -X
+    - cp target/nms-tools/mcp-1.12.jar /home/travis/build/Shynixn/Anchor-NMS/lib/mcp-1.12.jar
+    - mvn compile
 jdk:
   - oraclejdk8
 
