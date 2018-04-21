@@ -4,6 +4,7 @@ import com.github.shynixn.anchornms.logic.business.Factory;
 import com.github.shynixn.anchornms.logic.business.api.PluginServiceProvider;
 import com.github.shynixn.anchornms.logic.business.mcp.Version;
 import com.github.shynixn.anchornms.plugin.logger.LoggerBridge;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -59,6 +60,9 @@ public class ObfuscatorMojo extends AbstractMojo {
     @Parameter
     private String outputFile;
 
+    @Parameter
+    private String accessTransformer;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (this.versions == null) {
@@ -91,7 +95,9 @@ public class ObfuscatorMojo extends AbstractMojo {
         }
 
         final File buildFolder = new File(this.project.getBuild().getDirectory());
-        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(buildFolder, new LoggerBridge(this.getLog()))) {
+        final File sourceFolder = new File(this.project.getBuild().getSourceDirectory());
+        try (PluginServiceProvider pluginServiceProvider = Factory.createPluginServiceProvider(sourceFolder, buildFolder, accessTransformer, new LoggerBridge(this.getLog()))) {
+
             final List<Version> versions = new ArrayList<>();
             for (final String versionText : this.versions) {
                 final Version version = com.github.shynixn.anchornms.logic.business.mcp.Version.getVersionFromText(versionText);

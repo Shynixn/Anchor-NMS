@@ -48,16 +48,19 @@ public class ActionSetupService implements PluginServiceProvider {
 
     private final File userHomer = new File(System.getProperty("user.home"));
     private final File devTools;
+    private final File metaInfFolder;
+    private final String accessTransformer;
 
     private final GradleService gradleService;
 
     /**
      * Initializes a new setup service with the targetFolder and logger.
      *
+     * @param sourceFolder sourceFolder
      * @param targetFolder targetFolder
      * @param log          logger
      */
-    public ActionSetupService(File targetFolder, Logger log) {
+    public ActionSetupService(File sourceFolder, File targetFolder, String accessTransformer, Logger log) {
         super();
         if (targetFolder == null) {
             throw new IllegalArgumentException("Folder cannot be null!");
@@ -67,8 +70,13 @@ public class ActionSetupService implements PluginServiceProvider {
             throw new IllegalArgumentException("Logger cannot be null!");
         }
 
+        this.accessTransformer = accessTransformer;
+
         this.log = log;
         this.devTools = new File(targetFolder, DEV_FOLDER);
+
+        this.metaInfFolder = new File(sourceFolder, "../resources/META-INF");
+
         if (!this.devTools.exists()) {
             this.devTools.mkdir();
         }
@@ -80,6 +88,7 @@ public class ActionSetupService implements PluginServiceProvider {
      *
      * @param version version
      */
+    @Override
     public void generateLibrary(Version version) {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null!");
@@ -94,13 +103,54 @@ public class ActionSetupService implements PluginServiceProvider {
             return;
         }
 
+        this.log.info("Searching for access transformers  " + version.getVersion() + "_xxx_at.cfg ...");
+
+        if (this.metaInfFolder.exists()) {
+            for (final File file : this.metaInfFolder.listFiles()) {
+                this.log.info(file.getName() + " --- " + version.getVersion());
+                if (file.getName().startsWith(version.getVersion())) {
+                    final File buildFolder = new File(this.devTools, "src");
+                    if (!buildFolder.exists()) {
+                        buildFolder.mkdir();
+                    }
+
+                    final File classesFolder = new File(buildFolder, "main");
+                    if (!classesFolder.exists()) {
+                        classesFolder.mkdir();
+                    }
+
+                    this.log.info(classesFolder.getAbsolutePath());
+
+                    final File mainFolder = new File(classesFolder, "resources");
+                    if (!mainFolder.exists()) {
+                        mainFolder.mkdir();
+                    }
+
+                    this.log.info(mainFolder.getAbsolutePath());
+
+                    final File resourcesFolder = new File(mainFolder, "META-INF");
+                    if (!resourcesFolder.exists()) {
+                        resourcesFolder.mkdir();
+                    }
+
+                    this.log.info(resourcesFolder.getAbsolutePath());
+
+                    try {
+                        FileUtils.copyFile(file, new File(resourcesFolder, file.getName()));
+                    } catch (final IOException e) {
+                        this.log.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+
         this.log.info("Generating library " + version.getVersion() + " via ForgeGradle...");
 
         try {
-            this.gradleService.generateBuildGradleFor(version);
+            this.gradleService.generateBuildGradleFor(version, accessTransformer);
             this.gradleService.executeCommand("setupDecompWorkspace");
 
-            final File minecraftServerFile = new File(this.userHomer, version.getGradleInstallPath());
+            final File minecraftServerFile = new File(version.getGradleInstallPath());
             FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);
         } catch (IOException | InterruptedException | ZipException e) {
             throw new RuntimeException(e);
@@ -131,6 +181,7 @@ public class ActionSetupService implements PluginServiceProvider {
      * @param inputJarFile  input
      * @param outputJarFile output
      */
+    @Override
     public void obfuscateJar(File inputJarFile, File outputJarFile, Version... versions) {
         if (inputJarFile == null || outputJarFile == null) {
             throw new IllegalArgumentException("Define an input and an outputJar!");
@@ -171,7 +222,7 @@ public class ActionSetupService implements PluginServiceProvider {
 
             try {
                 this.log.info("Obfuscating " + version.getVersion() + " via ForgeGradle...");
-                this.gradleService.generateBuildGradleFor(version);
+                this.gradleService.generateBuildGradleFor(version, accessTransformer);
                 this.gradleService.executeCommand("build");
             } catch (IOException | InterruptedException | ZipException e) {
                 throw new RuntimeException(e);

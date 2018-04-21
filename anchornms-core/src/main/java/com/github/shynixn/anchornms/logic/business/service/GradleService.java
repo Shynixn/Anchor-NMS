@@ -1,7 +1,6 @@
 package com.github.shynixn.anchornms.logic.business.service;
 
 import com.github.shynixn.anchornms.logic.business.mcp.Version;
-import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -38,10 +37,6 @@ import java.net.URL;
  * SOFTWARE.
  */
 public class GradleService implements AutoCloseable {
-    private static final String GRADLE_DOWNLOAD = "https://services.gradle.org/distributions/gradle-4.6-bin.zip";
-    private static final String GRADLE_LOCAL = "gradle.jar";
-    private static final String GRADLE_VERSION = "gradle-4.6";
-
     private final File buildFolder;
     private final Logger log;
 
@@ -56,9 +51,16 @@ public class GradleService implements AutoCloseable {
      * @param version version
      * @throws IOException exception
      */
-    public void generateBuildGradleFor(Version version) throws IOException {
+    public void generateBuildGradleFor(Version version, String accessTransformer) throws IOException {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null!");
+        }
+
+        final String transform;
+        if (accessTransformer == null) {
+            transform = "";
+        } else {
+            transform = "manifest.attributes('FMLAT': '" + accessTransformer + "')";
         }
 
         final String resource = "build.gradle.txt";
@@ -71,6 +73,7 @@ public class GradleService implements AutoCloseable {
         content = content.replace("<SNAPSHOTMAPPING>", version.getSnapshotVersion())
                 .replace("<VERSION>", version.getVersion())
                 .replace("<FORGEGRADLEVERSION>", version.getForgeGradleVersion())
+                .replace("<ACCESSTRANSFORMER>", transform)
                 .replace("<PACKAGEVERSION>", version.getPackageVersion());
 
         FileUtils.write(buildGradleTargetFile, content, "UTF-8");
@@ -93,22 +96,8 @@ public class GradleService implements AutoCloseable {
         this.executeGradleCommand(this.buildFolder, command);
     }
 
-    private void setupProjectGradle() throws IOException, ZipException,  InterruptedException {
-        final File gradleDownloadFile = new File(this.buildFolder.getParentFile().getParentFile(), GRADLE_LOCAL);
-        if (!gradleDownloadFile.exists()) {
-            this.log.info("Downloading gradle...");
-            FileUtils.copyURLToFile(new URL(GRADLE_DOWNLOAD), gradleDownloadFile);
-            this.log.info("Finished downloading gradle.");
-        }
-
-        final File buildGradleTargetFile = new File(this.buildFolder, GRADLE_VERSION);
-        if (!buildGradleTargetFile.exists()) {
-            this.log.info("Installing gradle...");
-            final ZipFile zipFile = new ZipFile(gradleDownloadFile);
-            zipFile.extractAll(this.buildFolder.getAbsolutePath());
-            this.executeGradleCommand(this.buildFolder, "wrapper", true);
-            this.log.info("Finished installing gradle.");
-        }
+    private void setupProjectGradle() throws IOException, ZipException, InterruptedException {
+        this.executeGradleCommand(this.buildFolder, "wrapper", true);
     }
 
     private void executeGradleCommand(File commandFolder, String command) throws IOException, InterruptedException, ZipException {
@@ -116,8 +105,8 @@ public class GradleService implements AutoCloseable {
     }
 
     private void executeGradleCommand(File commandFolder, String command, boolean recursive) throws IOException, InterruptedException, ZipException {
-        final String winCommand = '"' + this.buildFolder.getAbsolutePath() + '\\' + GRADLE_VERSION + "\\bin\\gradle.bat" + '"';
-        final String otherCommand = '"' + this.buildFolder.getAbsolutePath() + '\\' + GRADLE_VERSION + "\\bin\\gradle" + '"';
+        final String winCommand = "gradle.bat";
+        final String otherCommand = "gradle";
 
         try {
             this.executeCommand(commandFolder, otherCommand, command);
@@ -129,6 +118,8 @@ public class GradleService implements AutoCloseable {
                     this.setupProjectGradle();
                     this.executeGradleCommand(commandFolder, command, true);
                 } else {
+                    this.log.error(ex.getMessage(), ex);
+                    this.log.error(e.getMessage(), e);
                     throw new RuntimeException("Failed to execute gradle command.", e);
                 }
             }
