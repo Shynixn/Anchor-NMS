@@ -150,7 +150,11 @@ public class ActionSetupService implements PluginServiceProvider {
             this.gradleService.generateBuildGradleFor(version, accessTransformer);
             this.gradleService.executeCommand("setupDecompWorkspace");
 
-            final File minecraftServerFile = new File(version.getGradleInstallPath());
+            File minecraftServerFile = new File(version.getGradleInstallPath());
+            if (!minecraftServerFile.exists()) {
+                minecraftServerFile = new File(version.getGradleInstallPath().replace("gradle", ".gradle"));
+            }
+
             FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);
         } catch (IOException | InterruptedException | ZipException e) {
             throw new RuntimeException(e);
