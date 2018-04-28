@@ -108,7 +108,7 @@ public class ActionSetupService implements PluginServiceProvider {
         if (this.metaInfFolder.exists()) {
             for (final File file : this.metaInfFolder.listFiles()) {
                 this.log.info(file.getName() + " --- " + version.getVersion());
-                if (file.getName().startsWith(version.getVersion())) {
+                if (file.getName().endsWith("cfg")) {
                     final File buildFolder = new File(this.devTools, "src");
                     if (!buildFolder.exists()) {
                         buildFolder.mkdir();
@@ -153,6 +153,10 @@ public class ActionSetupService implements PluginServiceProvider {
             File minecraftServerFile = new File(version.getGradleInstallPath());
             if (!minecraftServerFile.exists()) {
                 minecraftServerFile = new File(version.getGradleInstallPath().replace("gradle", ".gradle"));
+            }
+
+            if (!minecraftServerFile.exists()) {
+                minecraftServerFile = new File(this.devTools, ".gradle/minecraft/minecraft_serverSrc-" + version.getVersion() + "-PROJECT(nms-tools).jar");
             }
 
             FileUtils.copyFile(minecraftServerFile, temporaryLibraryFile);

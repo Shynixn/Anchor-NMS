@@ -35,7 +35,7 @@ The plugin is available in the central maven repository.
             <plugin>
                 <groupId>com.github.shynixn.anchornms</groupId>
                 <artifactId>anchornms-maven-plugin</artifactId>
-                <version>1.2.0</version>
+                <version>1.3.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -109,7 +109,7 @@ in the end.
         <plugin>
              <groupId>com.github.shynixn.anchornms</groupId>
              <artifactId>anchornms-maven-plugin</artifactId>
-             <version>1.2.0</version>
+             <version>1.3.0</version>
              <executions>
                  <execution>
                      <goals>
@@ -137,7 +137,7 @@ You can optionally define the input jar file which gets obfuscated and the outpu
         <plugin>
              <groupId>com.github.shynixn.anchornms</groupId>
              <artifactId>anchornms-maven-plugin</artifactId>
-             <version>1.2.0</version>
+             <version>1.3.0</version>
              <executions>
                  <execution>
                      <goals>
