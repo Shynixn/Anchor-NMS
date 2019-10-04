@@ -7,6 +7,11 @@
 
 JavaDocs: https://shynixn.github.io/Anchor-NMS/apidocs/
 
+
+### NOTICE
+
+This project is no longer under active development. 
+
 ## Description
 
 AnchorNMS is a maven plugin which is designed to internally use the mod development framework ForgeGradle for 
